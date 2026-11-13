@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Updates | A Research Resource</title>
+    
+    <!-- Meta tags -->
+    <meta name="description" content="A list of AI research links related to postdoctoral work on AI and narrative at the Center for Digital Narrative, University of Bergen (2023-2027). A resource for interdisciplinary research.">
+    <meta name="author" content="David Jhave Johnston, Gemini2.5 Pro">
+    <meta name="keywords" content="AI, artificial intelligence, narrative, research, postdoc, Center for Digital Narrative, University of Bergen, machine learning, foundation models, applied AI, AI art">
+    <meta name="robot" content="index,follow">
+    <meta property="og:title" content="AI Updates | A Research Resource by David Jhave Johnston">
+    <meta property="og:description" content="A list of AI research links related to postdoctoral work on AI and narrative at the Center for Digital Narrative, University of Bergen (2023-2027).">
+    <meta property="og:image" content="https://path/to/your/image.png">
+    <meta property="og:url" content="https://path/to/your/page.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI Updates | A Research Resource by David Jhave Johnston">
+    <meta name="twitter:description" content="A list of AI research links related to postdoctoral work on AI and narrative at the Center for Digital Narrative, University of Bergen (2023-2027).">
+    <meta name="twitter:image" content="https://path/to/your/image.png">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark Mode (Default) */
+        body {
+            background-color: #000000; /* black */
+            color: #d1d5db; /* gray-300 */
+        }
+        #theme-toggle, #view-toggle { color: #d1d5db; }
+        header h1 { color: #ffffff; }
+        #info-line { color: #6b7280; } /* Faint text color for dark mode */
+        #search-input { background-color: #1f2937; color: #ffffff; border-color: #374151; }
+        #search-input::placeholder { color: #9ca3af; }
+        .data-card { background-color: #111827; border-color: #374151; }
+        .data-card h2 a { color: #ffffff; }
+        .data-card h2 a.visited-link { color: #6b7280; }
+        .data-card .description { color: #d1d5db; }
+        .data-card .date { color: #9ca3af; }
+        .tag-button-main { background-color: #374151; color: #d1d5db; border-color: #4b5563; }
+        .tag-button-main:hover { background-color: #4b5563; }
+        .tag-button-main.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; }
+        .tag-button-item { background-color: #374151; color: #d1d5db; }
+        .tag-button-item:hover { background-color: #4b5563; }
+        .pagination-button, .pagination-select { background-color: #374151; border-color: #4b5563; }
+        .pagination-button:hover { background-color: #4b5563; }
+        .pagination-active { background-color: #3b82f6; color: #ffffff; }
+        .footer { color: #9ca3af; }
+        .header-image { filter: invert(1); }
+        .item-toggle { cursor: pointer; user-select: none; }
+        .details-divider { border-color: #374151; }
+
+        /* Light Mode */
+        body.light {
+            background-color: #ffffff;
+            color: #374151;
+        }
+        .light #theme-toggle, .light #view-toggle { color: #374151; }
+        .light header h1 { color: #111827; }
+        .light #info-line { color: #9ca3af; } /* Faint text color for light mode */
+        .light #search-input { background-color: #ffffff; color: #1f2937; border-color: #d1d5db; }
+        .light #search-input::placeholder { color: #6b7280; }
+        .light .data-card { background-color: #ffffff; border-color: #e5e7eb; }
+        .light .data-card h2 a { color: #111827; }
+        .light .data-card h2 a.visited-link { color: #9ca3af; }
+        .light .data-card .description { color: #4b5563; }
+        .light .data-card .date { color: #6b7280; }
+        .light .tag-button-main { background-color: #ffffff; color: #374151; border-color: #d1d5db; }
+        .light .tag-button-main:hover { background-color: #f3f4f6; }
+        .light .tag-button-main.active { background-color: #2563eb; color: #ffffff; border-color: #2563eb; }
+        .light .tag-button-item { background-color: #e5e7eb; color: #4b5563; }
+        .light .tag-button-item:hover { background-color: #d1d5db; }
+        .light .pagination-button, .light .pagination-select { background-color: #ffffff; border-color: #e5e7eb; }
+        .light .pagination-button:hover { background-color: #f3f4f6; }
+        .light .pagination-active { background-color: #2563eb; color: #ffffff; }
+        .light .footer { color: #6b7280; }
+        .light .header-image { filter: invert(0); }
+        .light .details-divider { border-color: #e5e7eb; }
+
+        /* Atlas link (added Oct 2026) */
+        .atlas-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+            margin: 16px 0 8px; padding: 14px 16px; border: 1px solid #374151; border-radius: 8px; background: #111827; }
+        .atlas-card-title { font-weight: 700; color: #ffffff; margin: 0; }
+        .atlas-card-text { font-size: 0.875rem; color: #9ca3af; margin: 2px 0 0; max-width: 46ch; }
+        .atlas-card-btn { display: inline-block; padding: 8px 14px; border-radius: 6px; font-size: 0.875rem; font-weight: 600;
+            background: #ffffff; color: #111827; text-decoration: none; white-space: nowrap; }
+        .atlas-card-btn:hover { background: #d1d5db; }
+        .light .atlas-card { border-color: #d1d5db; background: #f3f5f7; }
+        .light .atlas-card-title { color: #111827; }
+        .light .atlas-card-text { color: #4b5563; }
+        .light .atlas-card-btn { background: #15181c; color: #ffffff; }
+        .light .atlas-card-btn:hover { background: #374151; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <main class="container mx-auto p-4 md:p-8 max-w-3xl">
+        <a href="http://glia.ca/"><img src="img/glia-bw.png" width="20%" height="20%" alt="Glia website link" class="header-image"></a><br><br>
+
+        <header class="text-left mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight">AI Updates</h1>
+            <nav class="atlas-card" aria-label="Views of the archive">
+                <div>
+                    <p class="atlas-card-title">Atlas</p>
+                    <p class="atlas-card-text">The same links arranged by category and week, with related links and the full saved text.</p>
+                </div>
+                <a id="atlas-link" class="atlas-card-btn" href="atlas.html">Open the atlas</a>
+            </nav>
+            <div id="tag-container" class="mt-4 flex flex-wrap items-center gap-2"></div>
+        </header>
+
+        <!-- Info Line -->
+        <div id="info-line" class="text-sm mb-4 h-5"></div>
+
+        <!-- Control Toggles -->
+        <div class="flex justify-end items-center mb-4 space-x-2">
+            <button id="view-toggle" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Toggle Description View">
+                <svg id="view-toggle-full-icon" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                <svg id="view-toggle-headline-icon" class="hidden w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5" /></svg>
+            </button>
+            <button id="theme-toggle" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Toggle Dark/Light Mode">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 016.465 3.636l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+        
+        <div class="relative mb-8">
+             <input type="text" id="search-input" placeholder="Filter current view by keyword..." class="w-full p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div id="loading-indicator" class="text-center py-10"><p>Loading updates...</p></div>
+        <div id="data-container" class="space-y-6"></div>
+        <div id="pagination-container" class="mt-12 flex flex-col md:flex-row justify-between items-center gap-4"></div>
+    </main>
+    
+    <footer class="text-center p-8 text-sm footer">
+        <p>Archive powered by SQLite & PHP with Pinboard links fed via IFTT to GoogleSheets.</p>
+        <p>Coded by Gemini Pro in conjunction with Jhave. July, 2025</p>
+    </footer>
+
+    <script>
+    // --- CONFIGURATION ---
+    const API_URL = 'archive.php';
+
+    const TAG_MAP = {
+        "Alignment": "Alignment", 
+        "Applied AI": "Applied-AI", 
+        "AI Art Research": "AI-Art-Research", 
+        "AR/VR": "AR-VR", 
+        "Brain Implants": "BCI", 
+        "Consciousness": "Consciousness", 
+        "Ecology": "Ecology",
+        "Economy": "Economy",
+        "Education": "Edu",
+        "Ethics": "Ethics", 
+        "Foundation Models": "Foundation-Models",
+        "Governance": "Governance",
+        "Liferature": "Liferature",
+        "Medical": "Med",
+        "Observations": "Observations",
+        "Research into AI": "Research-into-AI",
+        "Robotics": "Robotics",
+        "Tech": "Tech", 
+        "Tangents": "Tangents",
+        "Theory": "Theory",
+        "Watching": "Watching", 
+        "War": "War"   
+    };
+    const MAIN_FILTER_TAGS = Object.keys(TAG_MAP);
+    const REVERSE_TAG_MAP = Object.fromEntries(Object.entries(TAG_MAP).map(([key, value]) => [value, key]));
+
+    // --- ELEMENTS ---
+    const searchInput = document.getElementById('search-input');
+    const dataContainer = document.getElementById('data-container');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const tagContainer = document.getElementById('tag-container');
+    const paginationContainer = document.getElementById('pagination-container');
+    const infoLine = document.getElementById('info-line');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const viewToggleBtn = document.getElementById('view-toggle');
+    const viewToggleFullIcon = document.getElementById('view-toggle-full-icon');
+    const viewToggleHeadlineIcon = document.getElementById('view-toggle-headline-icon');
+
+    // --- STATE ---
+    let activeTag = null;
+    let itemsPerPage = 200;
+    let currentData = [];
+    let descriptionView = 'full'; // 'full' or 'headline'
+    let visitedLinks = new Set();
+
+    // --- FUNCTIONS ---
+
+    async function fetchAndRender(page = 1, search = '', tag = null) {
+        loadingIndicator.style.display = 'block';
+        dataContainer.innerHTML = '';
+        paginationContainer.innerHTML = '';
+        infoLine.textContent = ''; // Clear previous info
+
+        const params = new URLSearchParams({ page, limit: itemsPerPage, search, filterTag: tag ? TAG_MAP[tag] : '' });
+        try {
+            const response = await fetch(`${API_URL}?${params.toString()}`);
+            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+            const result = await response.json();
+            currentData = result.data || [];
+
+            // Update the info line
+            if (result.pagination && result.pagination.totalItems > 0) {
+                const { currentPage, itemsPerPage, totalItems } = result.pagination;
+                const startItem = (currentPage - 1) * itemsPerPage + 1;
+                const endItem = startItem + currentData.length - 1;
+                infoLine.textContent = `Displaying ${startItem} - ${endItem} of ${totalItems} entries.`;
+            }
+
+            renderData();
+            renderPagination(result.pagination);
+        } catch (error) {
+            console.error('Failed to fetch from API:', error);
+            dataContainer.innerHTML = '<p class="text-center text-red-500 font-bold">Could not load data from archive.</p>';
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+    
+    function renderData() {
+        dataContainer.innerHTML = currentData.length === 0 
+            ? '<p class="text-center py-4">No matching entries found.</p>'
+            : currentData.map(item => {
+                const date = item.date_saved ? item.date_saved.split(' at ')[0] : 'No Date';
+                const itemTags = (item.tags || '').split(',').map(t => t.trim()).filter(t => t && t.toLowerCase() !== 'xdn');
+                const isVisited = visitedLinks.has(item.link) ? 'visited-link' : '';
+                
+                const showDetailsGlobally = descriptionView === 'full';
+                
+                const detailsHtml = `
+                    ${item.description ? `<p class="description mb-4 mt-3">${item.description.replace(/\n/g, '<br>')}</p>` : ''}
+                    ${itemTags.length > 0 ? `<div class="flex flex-wrap items-center gap-2 pt-3 border-t details-divider">${
+                        itemTags.map(dataTag => {
+                            const displayTag = REVERSE_TAG_MAP[dataTag] || dataTag;
+                            return `<button onclick="filterByTag('${displayTag}')" class="tag-button-item text-xs px-2 py-1 rounded-md transition-colors">${dataTag}</button>`;
+                        }).join('')
+                    }</div>` : ''}
+                `;
+
+                const itemToggleHtml = !showDetailsGlobally 
+                    ? `<span class="item-toggle text-xs ml-2 flex-shrink-0" onclick="toggleDescription(${item.id}, this)">[ + ]</span>`
+                    : '';
+
+                return `
+                    <div class="data-card p-6 rounded-lg border shadow-md" data-id="${item.id}">
+                        <p class="date text-xs mb-2">Date saved: ${date}</p>
+                        <div class="flex justify-between items-start">
+                             <h2 class="text-xl font-bold">
+                                <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="hover:underline ${isVisited}" onclick="markAsVisited('${item.link}', this)">${item.title}</a>
+                             </h2>
+                             ${itemToggleHtml}
+                        </div>
+                        <div class="details-container ${showDetailsGlobally ? '' : 'hidden'}">
+                            ${detailsHtml}
+                        </div>
+                    </div>`;
+            }).join('');
+    }
+    
+    function toggleDescription(itemId, element) {
+        const card = document.querySelector(`.data-card[data-id='${itemId}']`);
+        if (card) {
+            const details = card.querySelector('.details-container');
+            const isHidden = details.classList.toggle('hidden');
+            element.textContent = isHidden ? '[ + ]' : '[ - ]';
+        }
+    }
+
+    function markAsVisited(link, element) {
+        if (!visitedLinks.has(link)) {
+            visitedLinks.add(link);
+            localStorage.setItem('visitedLinks', JSON.stringify(Array.from(visitedLinks)));
+        }
+        element.classList.add('visited-link');
+    }
+
+    function renderPagination(pagination) {
+        paginationContainer.innerHTML = '';
+        if (!pagination || pagination.totalPages <= 1) return;
+
+        const selectorHtml = `
+            <div class="flex items-center gap-2 text-sm">
+                <label for="items-per-page">Display:</label>
+                <select id="items-per-page" class="pagination-select border rounded-md px-2 py-1">
+                    <option value="200" ${pagination.itemsPerPage == 200 ? 'selected' : ''}>200</option>
+                    <option value="300" ${pagination.itemsPerPage == 300 ? 'selected' : ''}>300</option>
+                    <option value="400" ${pagination.itemsPerPage == 400 ? 'selected' : ''}>400</option>
+                    <option value="500" ${pagination.itemsPerPage == 500 ? 'selected' : ''}>500</option>
+                    <option value="1000" ${pagination.itemsPerPage == 1000 ? 'selected' : ''}>1000</option>
+                </select>
+            </div>`;
+
+        // Truncated pagination: 1 … [window] … last
+        const { currentPage, totalPages } = pagination;
+        const WINDOW = 2;
+        let pages = [];
+        pages.push(1);
+        const winStart = Math.max(2, currentPage - WINDOW);
+        const winEnd = Math.min(totalPages - 1, currentPage + WINDOW);
+        if (winStart > 2) pages.push('…');
+        for (let i = winStart; i <= winEnd; i++) pages.push(i);
+        if (winEnd < totalPages - 1) pages.push('…');
+        if (totalPages > 1) pages.push(totalPages);
+
+        let pageLinksHtml = '<div class="flex items-center gap-1">';
+        if (currentPage > 1) pageLinksHtml += `<button onclick="changePage(${currentPage - 1})" class="pagination-button px-3 py-1 text-sm rounded-md">&laquo;</button>`;
+        for (const p of pages) {
+            if (p === '…') {
+                pageLinksHtml += `<span class="px-2 py-1 text-sm">&hellip;</span>`;
+            } else {
+                const isActive = p === currentPage;
+                pageLinksHtml += `<button onclick="changePage(${p})" class="pagination-button px-3 py-1 text-sm rounded-md ${isActive ? 'pagination-active' : ''}">${p}</button>`;
+            }
+        }
+        if (currentPage < totalPages) pageLinksHtml += `<button onclick="changePage(${currentPage + 1})" class="pagination-button px-3 py-1 text-sm rounded-md">&raquo;</button>`;
+        pageLinksHtml += '</div>';
+
+        paginationContainer.innerHTML = `${pageLinksHtml}${selectorHtml}`;
+        document.getElementById('items-per-page').addEventListener('change', (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            changePage(1);
+        });
+    }
+
+    function renderMainTags() {
+        tagContainer.innerHTML = MAIN_FILTER_TAGS.map(tag => {
+            const isActive = tag === activeTag;
+            return `<button onclick="filterByTag('${isActive ? '' : tag}')" class="tag-button-main px-2.5 py-1 text-xs font-medium rounded-full border transition-colors duration-200 ${isActive ? 'active' : ''}">${tag}</button>`;
+        }).join('');
+        if (activeTag) tagContainer.innerHTML += `<button onclick="filterByTag('')" class="px-2.5 py-1 text-xs font-medium text-blue-500 hover:underline">Show All</button>`;
+    }
+
+    function changePage(page) {
+        fetchAndRender(page, searchInput.value, activeTag);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterByTag(tag) {
+        activeTag = tag || null;
+        // carry the chosen category over to the atlas
+        document.getElementById('atlas-link').href = activeTag && TAG_MAP[activeTag]
+            ? 'atlas.html#tags=' + encodeURIComponent(TAG_MAP[activeTag]) : 'atlas.html';
+        searchInput.value = ''; 
+        renderMainTags();
+        fetchAndRender(1, '', activeTag);
+        if (tag) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- VIEW TOGGLE LOGIC ---
+    function applyViewMode(mode) {
+        descriptionView = mode;
+        const isHeadline = mode === 'headline';
+        viewToggleFullIcon.classList.toggle('hidden', isHeadline);
+        viewToggleHeadlineIcon.classList.toggle('hidden', !isHeadline);
+        localStorage.setItem('viewMode', mode);
+        renderData(); 
+    }
+
+    viewToggleBtn.addEventListener('click', () => {
+        const newMode = descriptionView === 'full' ? 'headline' : 'full';
+        applyViewMode(newMode);
+    });
+
+    // --- THEME TOGGLE LOGIC ---
+    function applyTheme(theme) {
+        const isLight = theme === 'light';
+        document.body.classList.toggle('light', isLight);
+        themeToggleDarkIcon.classList.toggle('hidden', isLight);
+        themeToggleLightIcon.classList.toggle('hidden', !isLight);
+        localStorage.setItem('theme', theme);
+    };
+
+    themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    // --- INITIALIZATION ---
+    async function main() {
+        const savedVisited = localStorage.getItem('visitedLinks');
+        if (savedVisited) {
+            visitedLinks = new Set(JSON.parse(savedVisited));
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        applyTheme(savedTheme || (prefersLight ? 'light' : 'dark'));
+
+        const savedViewMode = localStorage.getItem('viewMode') || 'full';
+        applyViewMode(savedViewMode);
+
+        renderMainTags();
+        // The page now simply fetches data on load. The update check is gone.
+        await fetchAndRender();
+    }
+
+    document.addEventListener('DOMContentLoaded', main);
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchAndRender(1, searchInput.value, activeTag), 300);
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Turn on the rewrite engine
+RewriteEngine On
+
+# Hide the .php extension
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# Make a clean URL for the API
+RewriteRule ^api/archive$ archive.php [L]
+
+# --- Security (added Oct 23, 2026) ---
+# Only GET/HEAD reach PHP here. Blocks POST requests, which are the
+# entry point for the session.upload_progress exploit (CVE-2026-109619).
+RewriteCond %{REQUEST_METHOD} !^(GET|HEAD)$
+RewriteRule .* - [F,L]
+
+# Do not serve the database, logs, ini files or backups directly.
+<FilesMatch "\.(sqlite|sqlite3|db|log|ini|bak)$|^error_log$|^config(\.example)?\.php$|^\.">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 ^/AI-updates/OLD-IGNORE-BACKUPS/
+
+Options -Indexes

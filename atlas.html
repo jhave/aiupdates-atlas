@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Updates Atlas</title>
+<meta name="description" content="An atlas of AI research links saved by David Jhave Johnston during postdoctoral work at the Center for Digital Narrative, University of Bergen (2023–2027): categories over time, connections between entries, full text.">
+<meta name="author" content="David Jhave Johnston">
+<script>
+  // Apply the saved theme before first paint. Shares the "theme" key with index.html.
+  (function () {
+    var t = 'light';
+    try { t = localStorage.getItem('theme') || 'light'; } catch (e) {}
+    document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+<style>
+:root {
+  --bg: #F3F5F7;
+  --surface: #FFFFFF;
+  --ink: #15181C;
+  --muted: #59626D;
+  --faint: #8C949E;
+  --rule: #DCE0E5;
+  --empty: #E7EAEE;
+  --band: rgba(21, 24, 28, 0.07);
+  --machines: #2856C2;
+  --minds: #0B8574;
+  --world: #A9640E;
+  --art: #9E347D;
+  --misc: #5C6A15;
+  --other: #6E7781;
+  --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, "Iowan Old Style", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #1A1D21;
+  --surface: #22262B;
+  --ink: #E6E9ED;
+  --muted: #A4ACB6;
+  --faint: #7A838E;
+  --rule: #363B42;
+  --empty: #2A2F35;
+  --band: rgba(230, 233, 237, 0.08);
+  --machines: #7FA3F3;
+  --minds: #4DC5B2;
+  --world: #E2A552;
+  --art: #E07CC1;
+  --misc: #B3C35B;
+  --other: #9AA3AD;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- top bar ---------- */
+.top {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 24px; border-bottom: 1px solid var(--rule); background: var(--surface);
+}
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { font: 600 20px/1.2 var(--sans); margin: 0; letter-spacing: -0.01em; }
+.brand h1 a { text-decoration: none; }
+.brand .sub { color: var(--muted); font-size: 13px; }
+.search { flex: 1 1 280px; display: flex; align-items: center; gap: 8px; max-width: 520px; margin-left: auto; position: relative; }
+.search input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 6px;
+  background: var(--bg); outline: none;
+}
+.search input:focus { border-color: var(--ink); }
+.search .hint { position: absolute; right: 10px; color: var(--faint); font-size: 12px; pointer-events: none; }
+.toplinks { display: flex; align-items: center; gap: 4px; }
+.toplinks a, .iconbtn {
+  border: 1px solid transparent; background: none; padding: 6px 10px; border-radius: 6px;
+  color: var(--muted); text-decoration: none; font-size: 13px;
+}
+.toplinks a:hover, .iconbtn:hover { border-color: var(--rule); color: var(--ink); }
+.iconbtn svg { width: 16px; height: 16px; vertical-align: -3px; }
+
+/* ---------- ledger ---------- */
+.ledger-wrap { padding: 12px 24px 4px; }
+.ledger-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.ledger-head h2 { font: 600 14px/1.3 var(--sans); margin: 0; }
+.ledger-head p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.ledger-head .keys { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; color: var(--faint); font-size: 12px; }
+.ledger-scroll { overflow-x: auto; overflow-y: hidden; }
+#ledger { display: block; user-select: none; touch-action: pan-x; }
+#ledger text { font-family: var(--sans); fill: var(--muted); }
+#ledger .rowlabel { font-size: 11px; cursor: pointer; }
+#ledger .rowlabel:hover, #ledger .rowlabel.on { fill: var(--ink); }
+#ledger .rowlabel.on { font-weight: 600; }
+#ledger .fam { font-size: 11px; fill: var(--faint); }
+#ledger #wkStatus { fill: var(--ink); font-variant-numeric: tabular-nums; }
+#ledger .famlabel { font-size: 11.5px; font-weight: 600; fill: var(--ink); cursor: pointer; }
+#ledger .famlabel .caret { fill: var(--faint); font-size: 10px; }
+#ledger .famlabel:hover .caret { fill: var(--ink); }
+#ledger .famlabel.on { text-decoration: underline; }
+#ledger .wk { cursor: pointer; }
+#ledger .axis { font-size: 11px; cursor: pointer; }
+#ledger .axis:hover { fill: var(--ink); }
+#ledger .tot { font-size: 11px; fill: var(--faint); font-variant-numeric: tabular-nums; }
+#ledger .cell { cursor: crosshair; }
+#ledger .dim { opacity: 0.28; }
+#ledger [tabindex]:focus { outline: none; }
+#ledger [tabindex]:focus-visible { fill: var(--ink); text-decoration: underline; font-weight: 600; }
+
+
+/* ---------- three panes ---------- */
+.panes {
+  display: grid; grid-template-columns: 200px minmax(0, 1fr) minmax(340px, 420px);
+  gap: 0; border-top: 1px solid var(--rule); align-items: start;
+}
+.pane { min-width: 0; }
+
+/* context */
+.context { padding: 16px 20px 40px 24px; border-right: 1px solid var(--rule); position: sticky; top: 0; max-height: 100vh; overflow-y: auto; }
+.context section + section { margin-top: 22px; }
+.context h3 { font: 600 12.5px/1.3 var(--sans); margin: 0 0 8px; color: var(--ink); }
+.context .note { color: var(--faint); font-size: 12px; margin: -4px 0 8px; }
+.bars { list-style: none; margin: 0; padding: 0; }
+.bars li { margin: 0; }
+.bars button {
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center;
+  width: 100%; padding: 3px 0; border: 0; background: none; text-align: left; font-size: 12.5px;
+  position: relative;
+}
+.bars button:hover .lab { color: var(--ink); text-decoration: underline; }
+.bars .lab { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+.bars .n { color: var(--faint); font-variant-numeric: tabular-nums; font-size: 11.5px; position: relative; z-index: 1; }
+.bars button.on .lab { color: var(--ink); font-weight: 600; }
+.bars button.zero .lab { color: var(--faint); }
+.famh { margin: 12px 0 2px; font-size: 11.5px; color: var(--faint); }
+.bars .fill { position: absolute; left: 0; bottom: 1px; height: 2px; border-radius: 1px; opacity: .75; }
+
+/* list */
+.listpane { border-right: 1px solid var(--rule); min-height: 100vh; }
+.listbar {
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 20px; border-bottom: 1px solid var(--rule);
+}
+.count { font-weight: 600; font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 2px 8px; font-size: 12px;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); color: var(--ink);
+}
+.chip .x { color: var(--faint); font-size: 14px; line-height: 1; }
+.chip:hover .x { color: var(--ink); }
+.chip .sw { width: 8px; height: 8px; border-radius: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-left: auto; }
+.seg button { border: 0; background: var(--surface); padding: 3px 10px; font-size: 12px; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.viewseg { margin-left: 0; }
+.viewseg span, .toplinks .viewseg a { padding: 4px 12px; font-size: 13px; border: 0; border-radius: 0; }
+.viewseg span { background: var(--ink); color: var(--bg); }
+.toplinks .viewseg a { color: var(--muted); background: var(--surface); border-left: 1px solid var(--rule); }
+.toplinks .viewseg a:hover { color: var(--ink); border-color: var(--rule); }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--muted); font-size: 12px; text-decoration: underline; }
+.linkbtn:hover { color: var(--ink); }
+
+#list { padding: 0 0 80px; }
+.week {
+  display: flex; align-items: baseline; gap: 10px; padding: 18px 20px 6px;
+  color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.week strong { color: var(--muted); font-weight: 600; }
+.week .wbar { flex: 1; height: 1px; background: var(--rule); align-self: center; }
+.row {
+  display: grid; grid-template-columns: 46px 40px minmax(0, 1fr); gap: 0 10px; align-items: baseline;
+  padding: 5px 20px; cursor: pointer; border-left: 2px solid transparent;
+}
+.row:hover { background: var(--surface); }
+.row.sel { background: var(--surface); border-left-color: var(--ink); }
+#list.ranked .row { grid-template-columns: 62px 40px minmax(0, 1fr); }
+.row .d { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sq { display: flex; gap: 2px; flex-wrap: wrap; align-self: center; }
+.sq i { display: block; width: 7px; height: 7px; border-radius: 1.5px; }
+.row .t { font-family: var(--serif); font-size: 15.5px; line-height: 1.35; color: var(--ink); }
+.row.seen .t { color: var(--muted); }
+.row .dom { font-family: var(--sans); font-size: 12px; color: var(--faint); margin-left: 6px; white-space: nowrap; }
+.row .s { grid-column: 3; color: var(--muted); font-size: 13px; margin-top: 2px; max-width: 92ch; }
+.row .rl { grid-column: 3; display: flex; flex-direction: column; gap: 1px; margin: 3px 0 2px; }
+.row .rl button {
+  display: flex; gap: 6px; align-items: baseline; border: 0; background: none; padding: 1px 0; text-align: left;
+  font-size: 12.5px; color: var(--muted); max-width: 80ch; min-width: 0; width: 100%;
+}
+.row .rl button:hover { color: var(--ink); text-decoration: underline; }
+.row .rl .ra { color: var(--faint); flex: none; }
+.row .rl .rt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .rl .ry { color: var(--faint); font-size: 11px; flex: none; font-variant-numeric: tabular-nums; }
+.row mark { background: none; color: inherit; box-shadow: inset 0 -0.45em 0 rgba(169,100,14,.22); }
+.empty { padding: 40px 20px; color: var(--muted); }
+.more { padding: 20px; color: var(--faint); font-size: 12px; }
+
+/* reader */
+.reader { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 20px 24px 60px; background: var(--surface); min-height: 100vh; }
+.reader .meta { color: var(--faint); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.reader h2 { font: 400 24px/1.25 var(--serif); margin: 8px 0 12px; letter-spacing: -0.005em; }
+.reader .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.reader .open {
+  display: inline-block; margin-bottom: 16px; padding: 6px 12px; border: 1px solid var(--ink); border-radius: 6px;
+  text-decoration: none; font-size: 13px; font-weight: 500;
+}
+.reader .open:hover { background: var(--ink); color: var(--surface); }
+.reader .body { font-family: var(--serif); font-size: 15.5px; line-height: 1.6; color: var(--ink); }
+.reader .body p { margin: 0 0 0.9em; }
+.reader .body .lede { font-size: 17px; color: var(--ink); }
+.reader .body p.short { margin-bottom: 0.35em; }
+.reader .body.clip { max-height: 26em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.reader h3 { font: 600 12.5px/1.3 var(--sans); margin: 26px 0 8px; padding-top: 16px; border-top: 1px solid var(--rule); }
+.trail { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 6px; font-size: 11.5px; margin: -8px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+.trail::-webkit-scrollbar { display: none; }
+.trail > * { flex: none; }
+.trail .tl { color: var(--faint); margin-right: 2px; }
+.trail .sep { color: var(--faint); }
+.trail button:not(.linkbtn) { border: 0; background: none; padding: 0; color: var(--muted); font-size: 11.5px; text-align: left; }
+.trail button:not(.linkbtn):hover { color: var(--ink); text-decoration: underline; }
+.trail button.cur { color: var(--ink); font-weight: 600; }
+.trail .linkbtn { margin-left: 4px; text-decoration: none; font-size: 14px; line-height: 1; }
+.rel { list-style: none; margin: 0; padding: 0; }
+.rel li button {
+  display: grid; grid-template-columns: 40px minmax(0,1fr); gap: 2px 10px; width: 100%; text-align: left;
+  border: 0; background: none; padding: 6px 0;
+}
+.rel .t { font-family: var(--serif); font-size: 14.5px; line-height: 1.35; }
+.rel button:hover .t { text-decoration: underline; }
+.rel .m { grid-column: 2; color: var(--faint); font-size: 11.5px; }
+.reader .placeholder { color: var(--muted); }
+.reader .placeholder h2 { font-size: 20px; }
+.reader .placeholder dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 13px; margin-top: 18px; }
+.reader .placeholder dt { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.reader .placeholder dd { margin: 0; }
+kbd { font: 11px var(--sans); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+.closer { display: none; }
+
+.foot { padding: 30px 24px 40px; color: var(--faint); font-size: 12px; border-top: 1px solid var(--rule); }
+.foot a { color: var(--muted); }
+.loading { padding: 60px 24px; color: var(--muted); }
+
+/* ---------- narrower screens ---------- */
+@media (max-width: 1180px) {
+  .panes { grid-template-columns: 180px minmax(0, 1fr) minmax(300px, 360px); }
+}
+@media (max-width: 960px) {
+  .panes { grid-template-columns: minmax(0, 1fr); }
+  .context { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--rule); padding: 14px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+  .context section + section { margin-top: 0; }
+  .listpane { border-right: 0; min-height: 0; }
+  .reader { position: fixed; inset: 0; z-index: 30; max-height: none; transform: translateY(100%); transition: transform .22s ease; }
+  .reader.open-m { transform: none; }
+  .closer { display: inline-block; margin-left: auto; }
+  .top, .ledger-wrap { padding-left: 16px; padding-right: 16px; }
+  .listbar, .row, .week { padding-left: 16px; padding-right: 16px; }
+}
+@media (max-width: 960px) { .ledger-head .keys span { display: none; } }
+@media (max-width: 560px) {
+  .row { grid-template-columns: 38px minmax(0, 1fr); }
+  .row .rl { grid-column: 2; }
+  .row .sq { display: none; }
+  .row .s { grid-column: 2; }
+  .rel li button { grid-template-columns: minmax(0,1fr); }
+  .rel .sq { display: none; }
+  .rel .m { grid-column: 1; }
+  .search .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .reader { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <h1><a href="atlas.html">AI Updates atlas</a></h1>
+    <span class="sub" id="sub">Loading the archive</span>
+  </div>
+  <label class="search">
+    <span class="sr-only">Search titles and full text</span>
+    <input id="q" type="search" placeholder="Search titles and full text" autocomplete="off" spellcheck="false">
+    <span class="hint"><kbd>/</kbd></span>
+  </label>
+  <nav class="toplinks">
+    <div class="seg viewseg" role="group" aria-label="View">
+      <span aria-current="page">Atlas</span><a href="index.html" title="The chronological list with full descriptions">List</a>
+    </div>
+    <button class="iconbtn" id="theme" type="button" aria-label="Switch to dark mode"></button>
+  </nav>
+</header>
+
+<section class="ledger-wrap" aria-label="Categories by week">
+  <div class="ledger-head">
+    <h2 id="ledgerTitle">Links saved, by week, newest on the left</h2>
+    <p class="keys"><span><kbd>/</kbd> search</span><span><kbd>j</kbd> <kbd>k</kbd> next, previous</span><span><kbd>b</kbd> back along the trail</span><span><kbd>o</kbd> open article</span><span><kbd>Esc</kbd> close, then clear</span><button class="linkbtn" id="expandAll" type="button">Show all categories</button></p>
+  </div>
+  <div class="ledger-scroll"><svg id="ledger" role="group" aria-label="Grid of categories by week. Family and category names are buttons."></svg></div>
+</section>
+
+<div class="panes">
+  <aside class="pane context" id="context" aria-label="About the current selection"></aside>
+  <main class="pane listpane">
+    <div class="listbar">
+      <span class="count" id="count"></span>
+      <div class="chips" id="chips"></div>
+      <div class="seg" role="group" aria-label="Density">
+        <button type="button" data-dens="links" title="Each link with its three closest entries">Connections</button>
+        <button type="button" data-dens="titles">Titles</button>
+        <button type="button" data-dens="summaries">Summaries</button>
+      </div>
+      <div class="seg" role="group" aria-label="Order" style="margin-left:0">
+        <button type="button" data-sort="desc">Newest</button>
+        <button type="button" data-sort="asc">Oldest</button>
+      </div>
+    </div>
+    <div id="list"><div class="loading">Loading the archive…</div></div>
+  </main>
+  <aside class="pane reader" id="reader" aria-label="Reader" aria-live="polite"></aside>
+</div>
+
+<footer class="foot">
+  Links saved to Pinboard by David Jhave Johnston, passed through IFTTT and Google Sheets into a SQLite archive.
+  Postdoctoral research, Center for Digital Narrative, University of Bergen.
+  <a href="index.html">List view</a> · <a href="https://glia.ca/">glia.ca</a>
+</footer>
+
+
+<script>
+'use strict';
+
+/* =====================================================================
+   CATEGORY MAPPING: the only block to edit when the Pinboard tags change.
+   FAMILIES  family key, display name, and its tags (order = row order).
+   LABEL     display names for tags whose tag text is not readable as is.
+   ALIAS     misspellings or variants (lowercase) -> canonical tag.
+   DROP      tags to ignore (lowercase).
+   Tags not listed here are not lost: they appear automatically in an
+   "Unsorted" family at the bottom of the grid, so new tags show up
+   until they are given a family here.
+   ===================================================================== */
+const FAMILIES = [
+  { key: 'machines', name: 'Machines', tags: ['Foundation-Models', 'Research-into-AI', 'Applied-AI', 'Tech', 'Robotics', 'Quantum', 'AR-VR'] },
+  { key: 'minds', name: 'Minds and bodies', tags: ['Consciousness', 'BCI', 'Med'] },
+  { key: 'world', name: 'World', tags: ['Governance', 'Economy', 'War', 'Ethics', 'Alignment', 'Edu', 'Ecology'] },
+  { key: 'art', name: 'Art and narrative', tags: ['AI-Art-Research', 'Liferature', 'Watching'] },
+  { key: 'misc', name: 'Misc', tags: ['Observations', 'Theory', 'Tangents'] },
+];
+const LABEL = {
+  'Foundation-Models': 'Foundation models', 'Research-into-AI': 'Research into AI', 'Applied-AI': 'Applied AI',
+  'AR-VR': 'AR / VR', 'BCI': 'Brain implants', 'Med': 'Medical', 'Edu': 'Education', 'AI-Art-Research': 'AI art research',
+};
+const ALIAS = {
+  'ar': 'AR-VR', 'vr': 'AR-VR', 'xr': 'AR-VR', 'ar/vr': 'AR-VR', 'consciousnesses': 'Consciousness',
+  'ehtics': 'Ethics', 'onservations': 'Observations', 'observation': 'Observations', 'literature': 'Liferature',
+  'applied': 'Applied-AI', 'ap': 'Applied-AI', 'economy"': 'Economy',
+};
+const DROP = new Set(['xdn', 'ai']);
+/* ---- end of category mapping ---- */
+const UNSORTED = { key: 'other', name: 'Unsorted', tags: [] };
+const NOCAT = 'No-category';
+LABEL[NOCAT] = 'No category';
+const TAG_FAMILY = {}; const CANON = {};
+FAMILIES.forEach(f => f.tags.forEach(t => { TAG_FAMILY[t] = f.key; CANON[t.toLowerCase()] = t; }));
+let ROWS = FAMILIES.flatMap(f => f.tags);
+const label = t => LABEL[t] || t;
+const famColor = t => `var(--${TAG_FAMILY[t] || 'other'})`;
+
+/* =====================================================================
+   Text helpers
+   ===================================================================== */
+const STOP = new Set(('a about above after again against all also am an and any are as at be because been before being below between both but by can could did do does doing down during each few for from further had has have having he her here hers him his how i if in into is it its itself just me more most my no nor not now of off on once only or other our ours out over own same she should so some such than that the their them then there these they this those through to too under until up very was we were what when where which while who whom why will with would you your yours new news via one two three first using used use make makes made like get gets got may might many much well way ways says said say according year years today week time let lets says per within without across around its it\'s don\'t can\'t isn\'t via amp nbsp www http https com org html youtube video watch post thread show shows see read via inc ltd just even still yet into onto upon really based introducing introduces introduce announcing launch launches launched latest every take takes big help helps need needs want wants including include includes thing things part look looks people paper study research researchers model models ai artificial intelligence january february march april june july august september october november december jan feb mar apr jun jul aug sep sept oct nov dec monday tuesday wednesday thursday friday saturday sunday').split(/\s+/));
+
+function tokenize(s) {
+  const out = [];
+  const re = /[a-z][a-z0-9'’-]*[a-z0-9]|[a-z]/g;
+  let m; s = s.toLowerCase();
+  while ((m = re.exec(s))) {
+    let w = m[0].replace(/[’']s$/, '').replace(/[’']/g, '');
+    out.push(w.length < 3 || STOP.has(w) || /^\d/.test(w) ? null : w);
+  }
+  return out; // nulls keep positions so bigrams don't jump over stopwords
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeHref = u => /^https?:\/\//i.test(u) ? u : '#';
+function domainOf(u) { const m = /^https?:\/\/([^\/?#]+)/i.exec(u || ''); return m ? m[1].replace(/^www\./, '').toLowerCase() : ''; }
+const fmtN = n => n.toLocaleString('en-GB');
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const fmtDate = d => `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function mondayOf(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+
+/* =====================================================================
+   State
+   ===================================================================== */
+let E = [];                // entries
+let BYID = new Map();
+let WEEKS = [];            // Date (Monday) per week index
+let N = 0;
+const DF = new Map();      // term -> doc frequency (unigrams + bigrams)
+const POST = new Map();    // unigram -> [[docIndex, weight], ...]
+let SEEN = new Set();
+const S = { q: '', tags: [], fam: '', w0: null, w1: null, dom: '', dens: 'links', sort: 'desc', sel: null };
+let ftIds = null;          // Set of ids from full-text search, or null
+let filtered = [];
+let base = [];             // entries matching search + source only
+let rendered = 0;
+
+const $ = id => document.getElementById(id);
+
+/* =====================================================================
+   Load + index
+   ===================================================================== */
+function canonTags(raw) {
+  const parts = String(raw || '').split(',').map(s => s.trim()).filter(Boolean);
+  const out = [], extra = [];
+  for (const p of parts) {
+    const k = p.toLowerCase();
+    if (DROP.has(k)) continue;
+    const c = CANON[k] || ALIAS[k];
+    if (c) { if (!out.includes(c)) out.push(c); }
+    else if (parts.length <= 8 && /^[A-Za-z][\w'’-]{1,24}$/.test(p)) extra.push(p);
+  }
+  out.sort((a, b) => ROWS.indexOf(a) - ROWS.indexOf(b));
+  return { tags: out, extra };
+}
+
+function build(data) {
+  const rows = data.entries || [];
+  let minT = Infinity, maxT = -Infinity;
+  E = rows.map((r, i) => {
+    const [id, unix, title, summary, link, rawTags] = r;
+    const d = new Date(unix * 1000);
+    const { tags, extra } = canonTags(rawTags);
+    minT = Math.min(minT, d.getTime()); maxT = Math.max(maxT, d.getTime());
+    return { i, id, unix, d, title: title || '(untitled)', summary: summary || '', link, tags, extra,
+             dom: domainOf(link), hay: (title + ' ' + summary).toLowerCase() };
+  });
+  N = E.length;
+  BYID = new Map(E.map(e => [e.id, e]));
+  addUnsorted();
+
+  // weeks
+  const first = mondayOf(new Date(minT)), last = mondayOf(new Date(maxT));
+  WEEKS = [];
+  for (let w = new Date(first); w <= last; w.setDate(w.getDate() + 7)) WEEKS.push(new Date(w));
+  const firstMs = first.getTime();
+  for (const e of E) e.w = Math.round((mondayOf(e.d).getTime() - firstMs) / 6048e5);
+
+  // terms: per-entry unique unigrams+bigrams for distinctive words; tf vectors for related
+  for (const e of E) {
+    const tt = tokenize(e.title), st = tokenize(e.summary);
+    const tf = new Map();
+    tt.forEach(w => { if (w) tf.set(w, (tf.get(w) || 0) + 2); });
+    st.forEach(w => { if (w) tf.set(w, (tf.get(w) || 0) + 1); });
+    const terms = new Set(tf.keys());
+    for (const seq of [tt, st]) for (let k = 0; k + 1 < seq.length; k++) if (seq[k] && seq[k + 1] && seq[k] !== seq[k + 1]) terms.add(seq[k] + ' ' + seq[k + 1]);
+    e.terms = Array.from(terms);
+    e.tf = tf;
+    for (const t of e.terms) DF.set(t, (DF.get(t) || 0) + 1);
+  }
+  // tf-idf postings (unigrams only)
+  for (const e of E) {
+    let norm = 0; const vec = [];
+    for (const [w, c] of e.tf) {
+      const df = DF.get(w);
+      if (df < 2 || df > N * 0.25) continue;
+      const wt = (1 + Math.log(c)) * Math.log(N / df);
+      vec.push([w, wt]); norm += wt * wt;
+    }
+    norm = Math.sqrt(norm) || 1;
+    e.vec = vec.map(([w, wt]) => [w, wt / norm]);
+    for (const [w, wt] of e.vec) { let p = POST.get(w); if (!p) POST.set(w, p = []); p.push(e.i, wt); }
+    delete e.tf;
+  }
+
+  const a = new Date(minT), b = new Date(maxT);
+  $('sub').textContent = `${fmtN(N)} links saved from ${MONTHS[a.getMonth()]} ${a.getFullYear()} to ${fmtDate(b)}`;
+}
+
+// Tags missing from the mapping become rows of the Unsorted family.
+// Spellings that differ only in case are merged; the most frequent spelling is shown.
+function addUnsorted() {
+  const n = new Map(), spell = new Map();
+  for (const e of E) for (const t of e.extra) {
+    const k = t.toLowerCase();
+    n.set(k, (n.get(k) || 0) + 1);
+    const sp = spell.get(k) || new Map(); sp.set(t, (sp.get(t) || 0) + 1); spell.set(k, sp);
+  }
+  const shown = new Map();
+  for (const [k, sp] of spell) shown.set(k, Array.from(sp).sort((a, b) => b[1] - a[1])[0][0]);
+  let none = 0;
+  for (const e of E) {
+    for (const t of e.extra) { const c = shown.get(t.toLowerCase()); if (!e.tags.includes(c)) e.tags.push(c); }
+    e.extra = [];
+    if (!e.tags.length) { e.tags.push(NOCAT); none++; }
+  }
+  const order = Array.from(n).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([k]) => shown.get(k));
+  if (none) order.push(NOCAT);
+  UNSORTED.tags = order;
+  if (order.length && !FAMILIES.includes(UNSORTED)) FAMILIES.push(UNSORTED);
+  order.forEach(t => { TAG_FAMILY[t] = UNSORTED.key; });
+  ROWS = FAMILIES.flatMap(f => f.tags);
+  for (const e of E) e.tags.sort((a, b) => ROWS.indexOf(a) - ROWS.indexOf(b));
+}
+
+/* =====================================================================
+   Filtering
+   ===================================================================== */
+function matchesBase(e) {
+  if (S.dom && e.dom !== S.dom) return false;
+  if (S.q) {
+    const q = S.q.toLowerCase();
+    if (!e.hay.includes(q) && !(ftIds && ftIds.has(e.id))) return false;
+  }
+  return true;
+}
+// One category: links must carry it. Several: links carrying any of them,
+// ranked by how many of the selected categories they carry.
+const multi = () => S.tags.length > 1;
+function matchesSel(e) {
+  if (S.tags.length === 1 && !e.tags.includes(S.tags[0])) return false;
+  if (multi()) {
+    let h = 0; for (const t of S.tags) if (e.tags.includes(t)) h++;
+    if (!h) return false;
+    e.hits = h;
+  }
+  if (S.fam && !e.tags.some(t => TAG_FAMILY[t] === S.fam)) return false;
+  if (S.w0 !== null && (e.w < S.w0 || e.w > S.w1)) return false;
+  return true;
+}
+function applyFilters() {
+  base = E.filter(matchesBase);
+  filtered = base.filter(matchesSel);
+  if (S.sort === 'asc') filtered = filtered.slice().reverse();
+  if (multi()) filtered.sort((a, b) => b.hits - a.hits); // stable: keeps date order within each rank
+  renderLedger(); renderChips(); renderContext(); renderList(true); writeHash();
+  autoSelect();
+}
+const wide = () => innerWidth > 960;
+function autoSelect() {
+  if (!wide() || !filtered.length) return;
+  if (S.sel !== null && !S.selAuto && filtered.some(e => e.id === S.sel)) return;
+  if (S.sel === filtered[0].id) return;
+  select(filtered[0].id, true, true);
+}
+
+/* =====================================================================
+   Ledger (SVG). Newest week on the left. Families collapse to one row.
+   ===================================================================== */
+let LG = null; // geometry for pointer handling
+let OPEN = new Set();
+try { OPEN = new Set(JSON.parse(localStorage.getItem('atlasOpen') || '[]')); } catch (e) {}
+function saveOpen() { try { localStorage.setItem('atlasOpen', JSON.stringify(Array.from(OPEN))); } catch (e) {} }
+// Closing a family also turns off its selected categories (and the family filter).
+function toggleFamily(k) {
+  if (!OPEN.has(k)) { OPEN.add(k); saveOpen(); renderLedger(); return; }
+  OPEN.delete(k); saveOpen();
+  const before = S.tags.length;
+  S.tags = S.tags.filter(t => TAG_FAMILY[t] !== k);
+  if (S.tags.length !== before) applyFilters(); else renderLedger();
+}
+
+function renderLedger() {
+  const svg = $('ledger');
+  const W = WEEKS.length;
+  const avail = Math.max(svg.parentNode.clientWidth, 300);
+  const narrow = avail < 820;
+  const gl = narrow ? 132 : 176, gr = narrow ? 34 : 46, top = 30, fh = 13, rh = 11;
+  const cw = Math.max(narrow ? 2 : 5, (avail - gl - gr) / W);
+  const width = Math.round(gl + gr + cw * W);
+  const x = w => gl + (W - 1 - w) * cw;           // newest on the left
+  const cwid = Math.max(1, cw - 1.5);
+
+  // selected tags keep their family open
+  S.tags.forEach(t => OPEN.add(TAG_FAMILY[t]));
+
+  // rows
+  const rows = [];
+  FAMILIES.forEach(f => {
+    rows.push({ type: 'fam', key: f.key, fam: f.key, label: f.name });
+    if (OPEN.has(f.key)) f.tags.forEach(t => rows.push({ type: 'tag', key: t, fam: f.key, label: label(t) }));
+  });
+  const idx = new Map(rows.map((r, i) => [r.type + ':' + r.key, i]));
+  const M = rows.map(() => new Array(W).fill(0));
+  const tot = new Array(rows.length).fill(0);
+  const colBase = new Array(W).fill(0), colSel = new Array(W).fill(0);
+  for (const e of base) {
+    colBase[e.w]++;
+    const fams = new Set();
+    for (const t of e.tags) {
+      fams.add(TAG_FAMILY[t]);
+      const r = idx.get('tag:' + t); if (r !== undefined) { M[r][e.w]++; tot[r]++; }
+    }
+    for (const f of fams) { const r = idx.get('fam:' + f); M[r][e.w]++; tot[r]++; }
+  }
+  for (const e of filtered) colSel[e.w]++;
+  let maxF = 1, maxT = 1;
+  rows.forEach((r, i) => M[i].forEach(v => { if (r.type === 'fam') { if (v > maxF) maxF = v; } else if (v > maxT) maxT = v; }));
+  const colMax = Math.max(1, ...colBase);
+
+  // y positions
+  const ys = []; let y = top + 6;
+  rows.forEach((r, i) => {
+    if (r.type === 'fam' && i) y += 3;
+    ys.push(y); y += r.type === 'fam' ? fh : rh;
+  });
+  const gridBottom = y;
+  const height = gridBottom + 24;
+  svg.setAttribute('width', width); svg.setAttribute('height', height);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  LG = { gl, cw, top, W, gridBottom, M, rows };
+
+  const out = [];
+  const tagOn = new Set(S.tags);
+  const focus = tagOn.size > 0 || !!S.fam;
+
+  if (S.w0 !== null) out.push(`<rect x="${x(S.w1) - 1}" y="2" width="${(S.w1 - S.w0 + 1) * cw + 1}" height="${gridBottom}" fill="var(--band)" rx="2"/>`);
+
+  // weekly totals: light bar = all links that week, darker bar = links matching the current filters
+  const sh = top - 8;
+  for (let w = 0; w < W; w++) {
+    out.push(`<rect class="wk" data-w="${w}" x="${x(w)}" y="2" width="${cwid}" height="${top - 4}" fill="transparent"/>`);
+    if (!colBase[w]) continue;
+    const hb = Math.max(1, sh * colBase[w] / colMax), hs = sh * colSel[w] / colMax;
+    out.push(`<rect class="wk" data-w="${w}" x="${x(w)}" y="${top - 2 - hb}" width="${cwid}" height="${hb}" fill="var(--empty)"/>`);
+    if (colSel[w]) out.push(`<rect class="wk" data-w="${w}" x="${x(w)}" y="${top - 2 - hs}" width="${cwid}" height="${Math.max(1, hs)}" fill="var(--faint)"/>`);
+  }
+  out.push(`<rect id="wkHover" x="0" y="2" width="${cwid}" height="${top - 4}" fill="var(--ink)" opacity=".18" visibility="hidden" pointer-events="none"/>`);
+  out.push(`<text class="fam" id="wkStatus" x="0" y="${top - 6}">Links per week</text>`);
+  LG.x = x; LG.cwid = cwid;
+
+  rows.forEach((r, i) => {
+    const yy = ys[i], h = r.type === 'fam' ? fh - 2 : rh - 2;
+    let on, dim;
+    if (r.type === 'fam') {
+      on = S.fam === r.key;
+      dim = focus && !on && !S.tags.some(t => TAG_FAMILY[t] === r.key);
+      const open = OPEN.has(r.key);
+      out.push(`<text class="famlabel${on ? ' on' : ''}" tabindex="0" role="button" aria-expanded="${open}" data-fam="${esc(r.key)}" x="0" y="${yy + 10}"><tspan class="caret">${open ? '▾' : '▸'}</tspan> ${esc(r.label)}</text>`);
+    } else {
+      on = tagOn.has(r.key);
+      dim = focus && !on;
+      out.push(`<text class="rowlabel${on ? ' on' : ''}" tabindex="0" role="button" aria-pressed="${on}" data-tag="${esc(r.key)}" x="16" y="${yy + 8.5}">${esc(r.label)}</text>`);
+    }
+    const max = r.type === 'fam' ? maxF : maxT;
+    out.push(`<g${dim ? ' class="dim"' : ''} fill="var(--${r.fam})">`);
+    for (let w = 0; w < W; w++) {
+      const v = M[i][w];
+      out.push(v
+        ? `<rect class="cell" data-i="${i}" data-w="${w}" x="${x(w)}" y="${yy}" width="${cwid}" height="${h}" rx="1.5" fill-opacity="${(0.22 + 0.78 * Math.sqrt(v / max)).toFixed(3)}"/>`
+        : `<rect class="cell" data-i="${i}" data-w="${w}" x="${x(w)}" y="${yy}" width="${cwid}" height="${h}" rx="1.5" fill="var(--empty)" opacity=".55"/>`);
+    }
+    out.push(`</g><text class="tot" x="${width - 4}" y="${yy + (r.type === 'fam' ? 10 : 8.5)}" text-anchor="end">${tot[i] ? fmtN(tot[i]) : ''}</text>`);
+  });
+
+  // month axis, newest first
+  let lastKey = '', lastX = -99, lastYear = null;
+  for (let w = W - 1; w >= 0; w--) {
+    const end = new Date(WEEKS[w]); end.setDate(end.getDate() + 6);
+    const mo = end.getMonth(), yr = end.getFullYear(), key = yr + '-' + mo;
+    if (key === lastKey) continue;
+    lastKey = key;
+    const showYear = yr !== lastYear;
+    if (x(w) - lastX < (showYear ? 40 : 30)) continue;
+    out.push(`<text class="axis" tabindex="0" role="button" data-month="${key}" x="${x(w)}" y="${gridBottom + 15}">${MONTHS[mo]}${showYear ? ' ' + yr : ''}</text>`);
+    out.push(`<rect x="${x(w)}" y="${gridBottom + 2}" width="1" height="4" fill="var(--rule)"/>`);
+    lastX = x(w) + (showYear ? 34 : 0); lastYear = yr;
+  }
+  svg.innerHTML = out.join('');
+
+  const allOpen = FAMILIES.every(f => OPEN.has(f.key));
+  $('expandAll').textContent = allOpen ? 'Collapse categories' : 'Show all categories';
+  const what = S.q ? ` containing “${S.q}”` : S.dom ? ` from ${S.dom}` : '';
+  $('ledgerTitle').textContent = `Links saved${what}, by week, newest on the left`;
+}
+
+$('expandAll').addEventListener('click', () => {
+  const allOpen = FAMILIES.every(f => OPEN.has(f.key));
+  OPEN = allOpen ? new Set() : new Set(FAMILIES.map(f => f.key));
+  saveOpen();
+  if (allOpen && S.tags.length) { S.tags = []; applyFilters(); } else renderLedger();
+});
+
+// pointer: click labels, click cell, click week bar, drag weeks, hover week bars
+(function ledgerEvents() {
+  const svg = $('ledger');
+  let drag = null;
+  const svgX = ev => { const r = svg.getBoundingClientRect(); return (ev.clientX - r.left) * (svg.viewBox.baseVal.width / r.width); };
+  const weekAt = ev => LG.W - 1 - Math.max(0, Math.min(LG.W - 1, Math.floor((svgX(ev) - LG.gl) / LG.cw)));
+  svg.addEventListener('pointerdown', ev => {
+    if (!LG || ev.button !== 0) return;
+    const t = ev.target;
+    if (t.closest('.rowlabel, .famlabel, .axis')) return;
+    if (svgX(ev) < LG.gl) return;
+    drag = { w: weekAt(ev), moved: false, target: t, x: ev.clientX };
+    svg.setPointerCapture(ev.pointerId);
+  });
+  svg.addEventListener('pointermove', ev => {
+    if (drag) {
+      const w = weekAt(ev);
+      if (Math.abs(ev.clientX - drag.x) > 4 || w !== drag.w) drag.moved = true;
+      if (drag.moved) { S.w0 = Math.min(drag.w, w); S.w1 = Math.max(drag.w, w); renderLedger(); }
+      return;
+    }
+    const t = ev.target;
+    if (t.classList && t.classList.contains('wk')) showWeek(+t.dataset.w); else clearWeek();
+  });
+  svg.addEventListener('pointerleave', clearWeek);
+  svg.addEventListener('pointerup', () => {
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (d.moved) { applyFilters(); return; }
+    const t = d.target, cl = t.classList || { contains: () => false };
+    if (cl.contains('cell')) {
+      const r = LG.rows[+t.dataset.i], w = +t.dataset.w;
+      const same = S.w0 === w && S.w1 === w && (r.type === 'fam' ? S.fam === r.key && !S.tags.length : S.tags.length === 1 && S.tags[0] === r.key && !S.fam);
+      if (same) { S.tags = []; S.fam = ''; S.w0 = S.w1 = null; }
+      else if (r.type === 'fam') { S.fam = r.key; S.tags = []; S.w0 = S.w1 = w; }
+      else { S.tags = [r.key]; S.fam = ''; S.w0 = S.w1 = w; }
+    } else if (cl.contains('wk')) {
+      const w = +t.dataset.w;
+      if (S.w0 === w && S.w1 === w) S.w0 = S.w1 = null; else S.w0 = S.w1 = w;
+    } else if (S.w0 !== null) { S.w0 = S.w1 = null; }
+    else return;
+    applyFilters();
+  });
+  // keyboard: Enter or Space on a family, category or month name acts like a click
+  svg.addEventListener('keydown', ev => {
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    const t = ev.target.closest && ev.target.closest('.rowlabel, .famlabel, .axis');
+    if (!t) return;
+    ev.preventDefault();
+    const attr = ['tag', 'fam', 'month'].find(a => t.dataset[a] !== undefined);
+    const val = t.dataset[attr];
+    t.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const back = Array.from(svg.querySelectorAll('[data-' + attr + ']')).find(n => n.dataset[attr] === val && n.hasAttribute('tabindex'));
+    if (back) back.focus();
+  });
+  svg.addEventListener('click', ev => {
+    const t = ev.target.closest('.rowlabel, .famlabel, .axis');
+    if (!t) return;
+    if (t.classList.contains('rowlabel')) toggleTag(t.dataset.tag);
+    else if (t.classList.contains('famlabel')) toggleFamily(t.dataset.fam);
+    else {
+      const [yy, mm] = t.dataset.month.split('-').map(Number);
+      const ws = WEEKS.map((d, w) => { const e = new Date(d); e.setDate(e.getDate() + 6); return e.getFullYear() === yy && e.getMonth() === mm ? w : -1; }).filter(w => w >= 0);
+      if (S.w0 === ws[0] && S.w1 === ws[ws.length - 1]) S.w0 = S.w1 = null; else { S.w0 = ws[0]; S.w1 = ws[ws.length - 1]; }
+      applyFilters();
+    }
+  });
+  // Hovering a weekly bar names the week in the label beside the bars. No pop-ups.
+  function showWeek(w) {
+    const n = base.filter(e => e.w === w).length;
+    const st = document.getElementById('wkStatus'), hv = document.getElementById('wkHover');
+    if (st) st.textContent = `Week of ${fmtDate(WEEKS[w])}: ${n}`;
+    if (hv) { hv.setAttribute('x', LG.x(w)); hv.setAttribute('visibility', 'visible'); }
+  }
+  function clearWeek() {
+    const st = document.getElementById('wkStatus'), hv = document.getElementById('wkHover');
+    if (st) st.textContent = 'Links per week';
+    if (hv) hv.setAttribute('visibility', 'hidden');
+  }
+})();
+
+function toggleTag(t) {
+  S.tags = S.tags.includes(t) ? S.tags.filter(x => x !== t) : S.tags.concat(t);
+  applyFilters();
+}
+
+/* =====================================================================
+   Chips + context pane
+   ===================================================================== */
+function periodLabel() {
+  if (S.w0 === null) return '';
+  const a = WEEKS[S.w0], b = new Date(WEEKS[S.w1]); b.setDate(b.getDate() + 6);
+  return S.w0 === S.w1 ? `Week of ${fmtDate(a)}` : `${fmtDate(a)} to ${fmtDate(b)}`;
+}
+function renderChips() {
+  const c = [];
+  if (S.q) c.push(`<button class="chip" data-clear="q">“${esc(S.q)}”<span class="x" aria-hidden="true">×</span><span class="sr-only">Remove</span></button>`);
+  S.tags.forEach(t => c.push(`<button class="chip" data-clear="tag" data-tag="${esc(t)}"><span class="sw" style="background:${famColor(t)}"></span>${esc(label(t))}<span class="x" aria-hidden="true">×</span></button>`));
+  if (S.fam) { const f = FAMILIES.find(f => f.key === S.fam); c.push(`<button class="chip" data-clear="fam"><span class="sw" style="background:var(--${f.key})"></span>${esc(f.name)}<span class="x" aria-hidden="true">×</span></button>`); }
+  if (S.w0 !== null) c.push(`<button class="chip" data-clear="time">${periodLabel()}<span class="x" aria-hidden="true">×</span></button>`);
+  if (S.dom) c.push(`<button class="chip" data-clear="dom">${esc(S.dom)}<span class="x" aria-hidden="true">×</span></button>`);
+  if (c.length > 1) c.push(`<button class="linkbtn" data-clear="all">Clear all</button>`);
+  $('chips').innerHTML = c.join('');
+  $('count').textContent = `${fmtN(filtered.length)} ${filtered.length === 1 ? 'link' : 'links'}`;
+  if (multi()) {
+    const all = filtered.filter(e => e.hits === S.tags.length).length;
+    $('count').textContent += `, ${fmtN(all)} with all ${S.tags.length}`;
+  }
+}
+$('chips').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-clear]'); if (!b) return;
+  const k = b.dataset.clear;
+  if (k === 'q' || k === 'all') { S.q = ''; $('q').value = ''; ftIds = null; }
+  if (k === 'tag') S.tags = S.tags.filter(t => t !== b.dataset.tag);
+  if (k === 'all') S.tags = [];
+  if (k === 'fam' || k === 'all') S.fam = '';
+  if (k === 'time' || k === 'all') S.w0 = S.w1 = null;
+  if (k === 'dom' || k === 'all') S.dom = '';
+  applyFilters();
+});
+
+function bars(items, max, kind, colorOf) {
+  return '<ul class="bars">' + items.map(([k, n, lab]) =>
+    `<li><button type="button" data-${kind}="${esc(k)}"><span class="lab">${esc(lab || k)}</span><span class="n">${fmtN(n)}</span>` +
+    `<span class="fill" style="width:${(100 * n / max).toFixed(1)}%;background:${colorOf ? colorOf(k) : 'var(--faint)'}"></span></button></li>`).join('') + '</ul>';
+}
+
+function renderContext() {
+  const ctx = $('context');
+  if (!filtered.length) { ctx.innerHTML = '<section><p class="note">Nothing matches. Remove a filter above.</p></section>'; return; }
+  const html = [];
+
+  // every category; counts are within the current list
+  const tc = new Map();
+  for (const e of filtered) for (const t of e.tags) tc.set(t, (tc.get(t) || 0) + 1);
+  const max = Math.max(1, ...tc.values());
+  const note = S.tags.length
+    ? 'Counts are within the current list. Select several categories to rank links by how many they share.'
+    : 'Click a category to filter. Select several to rank links by how many they share.';
+  html.push(`<section><h3>Categories</h3><p class="note">${note}</p>`);
+  // most common first; categories absent from the current list go last, in schema order
+  const order = ROWS.slice().sort((x, y) => (tc.get(y) || 0) - (tc.get(x) || 0));
+  html.push('<ul class="bars">');
+  for (const t of order) {
+    const n = tc.get(t) || 0, on = S.tags.includes(t);
+    html.push(`<li><button type="button" data-tag="${esc(t)}" class="${on ? 'on' : ''}${n ? '' : ' zero'}" aria-pressed="${on}">` +
+      `<span class="lab">${esc(label(t))}</span><span class="n">${n ? fmtN(n) : ''}</span>` +
+      `<span class="fill" style="width:${(100 * n / max).toFixed(1)}%;background:${famColor(t)}"></span></button></li>`);
+  }
+  html.push('</ul>');
+  html.push('</section>');
+
+  // sources
+  const dc = new Map();
+  for (const e of filtered) if (e.dom) dc.set(e.dom, (dc.get(e.dom) || 0) + 1);
+  const dl = Array.from(dc).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  if (dl.length) html.push(`<section><h3>Sources</h3>${bars(dl, dl[0][1], 'dom')}</section>`);
+  ctx.innerHTML = html.join('');
+}
+$('context').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  if (b.dataset.tag) toggleTag(b.dataset.tag);
+  else if (b.dataset.dom) { S.dom = S.dom === b.dataset.dom ? '' : b.dataset.dom; applyFilters(); }
+});
+
+/* =====================================================================
+   List
+   ===================================================================== */
+const CHUNK = 250;
+let io = null;
+function hilite(s) {
+  const t = esc(s);
+  if (!S.q || S.q.length < 2) return t;
+  const qq = esc(S.q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return t.replace(new RegExp(qq, 'gi'), m => `<mark>${m}</mark>`);
+}
+function rowHTML(e) {
+  const m = multi();
+  const sq = e.tags.map(t => `<i style="background:${famColor(t)}${m && !S.tags.includes(t) ? ';opacity:.3' : ''}" title="${esc(label(t))}"></i>`).join('');
+  const day = m ? `${e.d.getDate()} ${MONTHS[e.d.getMonth()]} ${String(e.d.getFullYear()).slice(2)}` : `${DAYS[e.d.getDay()]} ${e.d.getDate()}`;
+  return `<div class="row${SEEN.has(e.link) ? ' seen' : ''}${S.sel === e.id ? ' sel' : ''}" data-id="${e.id}" role="button" tabindex="-1">` +
+    `<span class="d" title="${fmtDate(e.d)}">${day}</span><span class="sq">${sq}<span class="sr-only">${esc(e.tags.map(label).join(', '))}</span></span>` +
+    `<span class="t">${hilite(e.title)}<span class="dom">${esc(e.dom)}</span></span>` +
+    (S.dens === 'summaries' && e.summary ? `<span class="s">${hilite(e.summary)}</span>` : '') +
+    (S.dens === 'links' ? rowRel(e) : '') + '</div>';
+}
+const REL3 = new Map();   // id -> three closest entries, computed when a row is first drawn
+function rowRel(e) {
+  let r = REL3.get(e.id);
+  if (!r) { r = related(e, 3).map(([o]) => o); REL3.set(e.id, r); }
+  if (!r.length) return '';
+  return '<span class="rl">' + r.map(o =>
+    `<button type="button" data-rel="${o.id}" title="${esc(fmtDate(o.d) + ', ' + o.dom)}"><span class="ra" aria-hidden="true">↳</span><span class="rt">${esc(o.title)}</span><span class="ry">${MONTHS[o.d.getMonth()]} ${o.d.getFullYear()}</span></button>`
+  ).join('') + '</span>';
+}
+function renderList(reset) {
+  const list = $('list');
+  if (reset) {
+    rendered = 0; list.innerHTML = '';
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty">No links match these filters.${S.q ? ' Try a shorter search word,' : ''} or remove a filter above.</div>`;
+      return;
+    }
+  }
+  const end = Math.min(filtered.length, rendered + CHUNK);
+  const html = [];
+  const m = multi(), n = S.tags.length;
+  const key = e => m ? e.hits : e.w;
+  list.classList.toggle('ranked', m);
+  let prev = rendered ? key(filtered[rendered - 1]) : null;
+  for (let k = rendered; k < end; k++) {
+    const e = filtered[k];
+    if (key(e) !== prev) {
+      prev = key(e);
+      let c = 0; for (let j = k; j < filtered.length && key(filtered[j]) === prev; j++) c++;
+      const head = m ? (e.hits === n ? (n === 2 ? 'Both categories' : `All ${n} categories`) : `${e.hits} of ${n} categories`) : `Week of ${fmtDate(WEEKS[e.w])}`;
+      html.push(`<div class="week"><strong>${head}</strong><span>${c} ${c === 1 ? 'link' : 'links'}</span><span class="wbar"></span></div>`);
+    }
+    html.push(rowHTML(e));
+  }
+  const old = list.querySelector('.more'); if (old) old.remove();
+  list.insertAdjacentHTML('beforeend', html.join(''));
+  rendered = end;
+  if (rendered < filtered.length) {
+    list.insertAdjacentHTML('beforeend', `<div class="more">Showing ${fmtN(rendered)} of ${fmtN(filtered.length)}. Scroll for more.</div>`);
+    if (io) io.disconnect();
+    io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); renderList(false); } }, { rootMargin: '600px' });
+    io.observe(list.querySelector('.more'));
+  }
+}
+$('list').addEventListener('click', ev => {
+  const rl = ev.target.closest('[data-rel]');
+  if (rl) { select(+rl.dataset.rel); return; }
+  const r = ev.target.closest('.row'); if (!r) return;
+  select(+r.dataset.id, true);
+});
+
+/* =====================================================================
+   Reader + related
+   ===================================================================== */
+function related(e, k) {
+  const acc = new Float32Array(N);
+  for (const [w, wt] of e.vec) {
+    const p = POST.get(w); if (!p) continue;
+    for (let j = 0; j < p.length; j += 2) acc[p[j]] += wt * p[j + 1];
+  }
+  const tagSet = new Set(e.tags);
+  const cand = [];
+  for (let i = 0; i < N; i++) {
+    if (acc[i] < 0.06 || i === e.i) continue;
+    const o = E[i]; if (o.link === e.link || o.title === e.title) continue;
+    let shared = 0; for (const t of o.tags) if (tagSet.has(t)) shared++;
+    const union = tagSet.size + o.tags.length - shared;
+    cand.push([i, acc[i] + (union ? 0.08 * shared / union : 0)]);
+  }
+  cand.sort((a, b) => b[1] - a[1]);
+  return cand.slice(0, k).map(([i, s]) => [E[i], s]);
+}
+function relHTML(list) {
+  return '<ul class="rel">' + list.map(([o, s]) =>
+    `<li><button type="button" data-id="${o.id}"><span class="sq">${o.tags.map(t => `<i style="background:${famColor(t)}"></i>`).join('')}</span>` +
+    `<span class="t">${esc(o.title)}</span><span class="m">${fmtDate(o.d)}, ${esc(o.dom)}</span></button></li>`).join('') + '</ul>';
+}
+const textCache = new Map();
+function paragraphs(text) {
+  const ps = text.split(/\n\s*\n|\n~\n/).map(s => s.replace(/\s*\n\s*/g, ' ').trim()).filter(s => s && s !== '~');
+  return ps.map((p, k) => `<p class="${k === 0 ? 'lede' : ''}${p.length < 70 ? ' short' : ''}">${esc(p)}</p>`).join('');
+}
+let TRAIL = [];
+try { TRAIL = JSON.parse(sessionStorage.getItem('atlasTrail') || '[]').filter(n => Number.isInteger(n)); } catch (e) {}
+function saveTrail() { try { sessionStorage.setItem('atlasTrail', JSON.stringify(TRAIL)); } catch (e) {} }
+function trailHTML(id) {
+  const t = TRAIL.filter(n => BYID.has(n));
+  if (t.length < 2) return '';
+  return '<nav class="trail" aria-label="Trail of opened links"><span class="tl">Trail</span>' + t.map(n => {
+    const o = BYID.get(n), cur = n === id;
+    return `<button type="button" data-id="${n}"${cur ? ' aria-current="true" class="cur"' : ''} title="${esc(o.title)}">${esc(o.title.length > 26 ? o.title.slice(0, 24).replace(/\s+\S*$/, '') + '…' : o.title)}</button>`;
+  }).join('<span class="sep" aria-hidden="true">›</span>') + '<button type="button" class="linkbtn" data-trailclear title="Clear the trail" aria-label="Clear the trail">×</button></nav>';
+}
+function select(id, fromList, auto) {
+  const e = BYID.get(id); if (!e) return;
+  S.sel = id;
+  if (!auto && !TRAIL.includes(id)) { TRAIL.push(id); if (TRAIL.length > 12) TRAIL = TRAIL.slice(-12); saveTrail(); }
+  S.selAuto = !!auto; // an automatic pick is not written into the shareable address
+  document.querySelectorAll('.row.sel').forEach(r => r.classList.remove('sel'));
+  const row = document.querySelector(`.row[data-id="${id}"]`);
+  if (row) { row.classList.add('sel'); if (!fromList) row.scrollIntoView({ block: 'nearest' }); }
+  const rd = $('reader');
+  const tags = e.tags.map(t => `<button class="chip" data-tag="${esc(t)}"><span class="sw" style="background:${famColor(t)}"></span>${esc(label(t))}</button>`)
+    .concat(e.extra.map(t => `<span class="chip">${esc(t)}</span>`)).join('');
+  const rel = related(e, 8);
+  const sameWeek = e.tags.length ? E.filter(o => o.w === e.w && o.id !== e.id && o.tags.some(t => t === e.tags[0])).slice(0, 5) : [];
+  rd.innerHTML = trailHTML(id) +
+    `<div class="meta"><span>${DAYS[e.d.getDay()]} ${fmtDate(e.d)}</span><span>${esc(e.dom)}</span>` +
+    `<button class="iconbtn closer" type="button" data-close>Close</button></div>` +
+    `<h2>${esc(e.title)}</h2><div class="tags">${tags}</div>` +
+    `<a class="open" href="${esc(safeHref(e.link))}" target="_blank" rel="noopener noreferrer" data-visit>Open the article</a>` +
+    `<div class="body" id="rbody">${e.summary ? `<p class="lede">${esc(e.summary)}</p>` : ''}</div>` +
+    (rel.length ? `<h3>Related across the archive</h3>${relHTML(rel)}` : '') +
+    (sameWeek.length ? `<h3>Same week in ${esc(label(e.tags[0]))}</h3>${relHTML(sameWeek.map(o => [o, 0]))}` : '');
+  rd.scrollTop = 0;
+  const tr = rd.querySelector('.trail'); if (tr) { const c = tr.querySelector('.cur'); tr.scrollLeft = c ? c.offsetLeft - tr.clientWidth / 2 : tr.scrollWidth; }
+  rd.classList.add('open-m');
+  writeHash();
+  loadText(e);
+}
+async function loadText(e) {
+  let text = textCache.get(e.id);
+  if (text === undefined) {
+    try {
+      const r = await fetch(`atlas.php?id=${e.id}`);
+      if (!r.ok) throw new Error(r.status);
+      text = (await r.json()).text || '';
+    } catch (err) { text = null; }
+    textCache.set(e.id, text);
+  }
+  if (S.sel !== e.id) return;
+  const body = $('rbody');
+  if (text === null) { body.insertAdjacentHTML('beforeend', '<p class="placeholder">The full text could not be loaded. Open the article instead.</p>'); return; }
+  if (!text) return;
+  body.innerHTML = paragraphs(text);
+  if (text.length > 2600) {
+    body.classList.add('clip');
+    body.insertAdjacentHTML('afterend', '<button class="linkbtn" id="morebtn" type="button">Show the full saved text</button>');
+  }
+}
+$('reader').addEventListener('click', ev => {
+  const b = ev.target.closest('button, a');
+  if (!b) return;
+  if (b.id === 'morebtn') { $('rbody').classList.remove('clip'); b.remove(); }
+  else if (b.dataset.close !== undefined) closeReader();
+  else if (b.dataset.trailclear !== undefined) { TRAIL = S.sel !== null ? [S.sel] : []; saveTrail(); const n = document.querySelector('#reader .trail'); if (n) n.remove(); }
+  else if (b.dataset.visit !== undefined) markSeen(BYID.get(S.sel));
+  else if (b.dataset.id) select(+b.dataset.id);
+  else if (b.dataset.tag) { S.tags = [b.dataset.tag]; applyFilters(); }
+});
+function closeReader() { $('reader').classList.remove('open-m'); }
+function markSeen(e) {
+  if (!e || SEEN.has(e.link)) return;
+  SEEN.add(e.link);
+  try { localStorage.setItem('visitedLinks', JSON.stringify(Array.from(SEEN))); } catch (err) {}
+  const r = document.querySelector(`.row[data-id="${e.id}"]`); if (r) r.classList.add('seen');
+}
+function readerIntro() {
+  const fams = FAMILIES.map(f => `<span style="color:var(--${f.key})">■</span> ${esc(f.name)}`).join('<br>');
+  $('reader').innerHTML = `<div class="placeholder"><h2>Choose a link to read it here</h2>
+    <p>The reader shows the saved text and the entries most closely related to it, found by shared vocabulary across all ${fmtN(N)} links.</p>
+    <p>${fams}</p>
+    <dl><dt><kbd>/</kbd></dt><dd>Search</dd><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Next and previous link</dd>
+    <dt><kbd>b</kbd></dt><dd>Back along the trail of opened links</dd>
+    <dt><kbd>o</kbd></dt><dd>Open the article</dd><dt><kbd>Esc</kbd></dt><dd>Close the reader, then clear filters</dd></dl></div>`;
+}
+
+/* =====================================================================
+   Search
+   ===================================================================== */
+let qTimer = null, qSeq = 0;
+function setQuery(v) {
+  S.q = v.trim(); ftIds = null; applyFilters();
+  clearTimeout(qTimer);
+  if (S.q.length < 3) return;
+  const mine = ++qSeq;
+  qTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(`atlas.php?q=${encodeURIComponent(S.q)}`);
+      if (!r.ok) return;
+      const j = await r.json();
+      if (mine !== qSeq) return;
+      ftIds = new Set(j.ids || []);
+      applyFilters();
+    } catch (err) { /* title + summary search still works */ }
+  }, 350);
+}
+$('q').addEventListener('input', ev => {
+  const v = ev.target.value;
+  clearTimeout(setQuery.t); setQuery.t = setTimeout(() => setQuery(v), 160);
+});
+
+/* =====================================================================
+   Density, order, theme, keys, hash
+   ===================================================================== */
+document.querySelectorAll('[data-dens]').forEach(b => b.addEventListener('click', () => {
+  S.dens = b.dataset.dens; try { localStorage.setItem('atlasDensity', S.dens); } catch (e) {}
+  syncSeg(); renderList(true);
+}));
+document.querySelectorAll('[data-sort]').forEach(b => b.addEventListener('click', () => {
+  if (S.sort === b.dataset.sort) return; S.sort = b.dataset.sort; syncSeg(); applyFilters();
+}));
+function syncSeg() {
+  document.querySelectorAll('[data-dens]').forEach(b => b.setAttribute('aria-pressed', b.dataset.dens === S.dens));
+  document.querySelectorAll('[data-sort]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sort === S.sort));
+}
+const SUN = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="10" cy="10" r="3.6"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 1.8v2M10 16.2v2M1.8 10h2M16.2 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M4.2 15.8l1.4-1.4M14.4 5.6l1.4-1.4"/></g></svg>';
+const MOON = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M16.8 12.9A7 7 0 0 1 7.1 3.2a7.2 7.2 0 1 0 9.7 9.7z"/></svg>';
+function syncTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const b = $('theme');
+  b.innerHTML = (dark ? SUN : MOON) + `<span style="margin-left:6px">${dark ? 'Light' : 'Dark'}</span>`;
+  b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+}
+$('theme').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('theme', next); } catch (e) {}
+  syncTheme();
+});
+
+document.addEventListener('keydown', ev => {
+  const inField = ev.target.matches('input, textarea, select');
+  if (ev.key === '/' && !inField) { ev.preventDefault(); $('q').focus(); $('q').select(); return; }
+  if (ev.key === 'Escape') {
+    if (inField) { ev.target.blur(); return; }
+    if ($('reader').classList.contains('open-m') && innerWidth <= 960) { closeReader(); return; }
+    if (S.sel !== null) { S.sel = null; document.querySelectorAll('.row.sel').forEach(r => r.classList.remove('sel')); readerIntro(); writeHash(); return; }
+    S.q = ''; $('q').value = ''; ftIds = null; S.tags = []; S.fam = ''; S.w0 = S.w1 = null; S.dom = ''; applyFilters(); return;
+  }
+  if (inField || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  // Claim the shortcut keys so Firefox's "Search for text when you start typing" does not take them.
+  if (['j', 'k', 'b', 'o'].includes(ev.key)) ev.preventDefault();
+  if (ev.key === 'j' || ev.key === 'k') {
+    if (!filtered.length) return;
+    let k = filtered.findIndex(e => e.id === S.sel);
+    k = k < 0 ? 0 : Math.max(0, Math.min(filtered.length - 1, k + (ev.key === 'j' ? 1 : -1)));
+    while (k >= rendered) renderList(false);
+    select(filtered[k].id);
+  } else if (ev.key === 'b') {
+    const k = TRAIL.indexOf(S.sel);
+    if (k > 0) select(TRAIL[k - 1]);
+  } else if (ev.key === 'o' && S.sel !== null) {
+    const e = BYID.get(S.sel); markSeen(e); window.open(safeHref(e.link), '_blank', 'noopener');
+  }
+});
+
+function writeHash() {
+  const p = new URLSearchParams();
+  if (S.q) p.set('q', S.q);
+  if (S.tags.length) p.set('tags', S.tags.join(','));
+  if (S.w0 !== null) { p.set('from', isoDay(WEEKS[S.w0])); p.set('to', isoDay(WEEKS[S.w1])); }
+  if (S.fam) p.set('family', S.fam);
+  if (S.dom) p.set('source', S.dom);
+  if (S.sel !== null && !S.selAuto) p.set('entry', S.sel);
+  const h = p.toString();
+  history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
+}
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  S.w0 = S.w1 = null; ftIds = null;
+  S.q = p.get('q') || ''; $('q').value = S.q;
+  S.tags = (p.get('tags') || '').split(',').filter(t => ROWS.includes(t));
+  S.dom = p.get('source') || '';
+  const fam = p.get('family') === 'self' ? 'misc' : p.get('family');
+  S.fam = FAMILIES.some(f => f.key === fam) ? fam : '';
+  const f = p.get('from'), t = p.get('to');
+  if (f && t) {
+    const wi = s => WEEKS.findIndex(d => isoDay(d) === s);
+    const a = wi(f), b = wi(t);
+    if (a >= 0 && b >= 0) { S.w0 = Math.min(a, b); S.w1 = Math.max(a, b); }
+  }
+  const e = +p.get('entry'); return BYID.has(e) ? e : null;
+}
+
+// a pasted or edited address in an open tab applies its filters
+addEventListener('hashchange', () => {
+  if (!N) return;
+  const entry = readHash(); S.sel = null;
+  applyFilters();
+  if (S.q.length >= 3) setQuery(S.q);
+  if (entry !== null) select(entry);
+});
+let rT = null;
+addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => LG && renderLedger(), 120); });
+
+/* =====================================================================
+   Start
+   ===================================================================== */
+(async function main() {
+  syncTheme();
+  try { const d = localStorage.getItem('atlasDensity'); if (d === 'titles' || d === 'summaries' || d === 'links') S.dens = d; } catch (e) {}
+  try { SEEN = new Set(JSON.parse(localStorage.getItem('visitedLinks') || '[]')); } catch (e) {}
+  syncSeg();
+  let data;
+  try {
+    const r = await fetch('atlas.php');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    data = await r.json();
+  } catch (err) {
+    $('list').innerHTML = `<div class="empty">The archive could not be loaded (${esc(err.message)}). Check that atlas.php and ai_updates.sqlite are in the same folder as this page.</div>`;
+    $('sub').textContent = 'Archive unavailable';
+    return;
+  }
+  build(data);
+  const entry = readHash();
+  applyFilters();
+  if (S.q.length >= 3) setQuery(S.q);
+  if (entry !== null) select(entry); else if (!wide() || !filtered.length) readerIntro();
+})();
+</script>
+</body>
+</html>

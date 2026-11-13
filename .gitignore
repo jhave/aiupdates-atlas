@@ -1,0 +1,23 @@
+# Secrets: real key and sheet URL live here, never in git
+config.php
+.env
+
+# Old versions and backups (local only)
+OLD-IGNORE-BACKUPS/
+OLD/
+
+# Separate local project with large data
+auto-update/
+
+# Logs, OS and editor noise
+error_log
+*.log
+.DS_Store
+__pycache__/
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# The archive database stays on the server and local drive, not in git
+*.sqlite
+*.sqlite3
