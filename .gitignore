@@ -21,3 +21,6 @@ __pycache__/
 # The archive database stays on the server and local drive, not in git
 *.sqlite
 *.sqlite3
+
+# Local tooling
+.claude/
