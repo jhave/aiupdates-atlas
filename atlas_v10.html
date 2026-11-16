@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Updates Atlas V10: living map</title>
+<meta name="description" content="A map of AI research links saved by David Jhave Johnston during postdoctoral work at the Center for Digital Narrative, University of Bergen. Links that share vocabulary sit together; a time strip shows when each area was active.">
+<meta name="author" content="David Jhave Johnston">
+<script>
+  // Apply the saved theme before first paint. Shares the "theme" key with index.html and atlas.html.
+  (function () {
+    var t = 'light';
+    try { t = localStorage.getItem('theme') || 'light'; } catch (e) {}
+    document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+<style>
+:root {
+  --bg: #F3F5F7; --surface: #FFFFFF; --ink: #15181C; --muted: #59626D; --faint: #8C949E;
+  --rule: #DCE0E5; --empty: #E1E5EA;
+  --machines: #2856C2; --minds: #0B8574; --world: #A9640E; --art: #9E347D; --misc: #5C6A15; --other: #6E7781;
+  --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, "Iowan Old Style", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #1A1D21; --surface: #22262B; --ink: #E6E9ED; --muted: #A4ACB6; --faint: #7A838E;
+  --rule: #363B42; --empty: #30353C;
+  --machines: #7FA3F3; --minds: #4DC5B2; --world: #E2A552; --art: #E07CC1; --misc: #B3C35B; --other: #9AA3AD;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+kbd { font: 11px var(--sans); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+
+/* ---------- frame ---------- */
+.app { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100vh; height: 100dvh; }
+.top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 20px; border-bottom: 1px solid var(--rule); background: var(--surface); }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { font: 600 18px/1.2 var(--sans); margin: 0; letter-spacing: -0.01em; white-space: nowrap; }
+.brand h1 a { text-decoration: none; }
+.brand .sub { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search { flex: 1 1 240px; max-width: 460px; margin-left: auto; position: relative; display: flex; align-items: center; }
+.search input { width: 100%; padding: 7px 34px 7px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); outline: none; }
+.search input:focus { border-color: var(--ink); }
+.search .hint { position: absolute; right: 9px; color: var(--faint); pointer-events: none; }
+.toplinks { display: flex; align-items: center; gap: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg > * { padding: 4px 11px; font-size: 13px; text-decoration: none; color: var(--muted); background: var(--surface); border: 0; }
+.seg > * + * { border-left: 1px solid var(--rule); }
+.seg > [aria-current], .seg > [aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg > a:hover { color: var(--ink); }
+.iconbtn { border: 1px solid transparent; background: none; padding: 5px 9px; border-radius: 6px; color: var(--muted); font-size: 13px; }
+.iconbtn:hover { border-color: var(--rule); color: var(--ink); }
+.iconbtn svg { width: 16px; height: 16px; vertical-align: -3px; }
+
+.main { display: grid; grid-template-columns: minmax(0, 1fr) var(--panel-w, clamp(320px, 31vw, 430px)); min-height: 0; position: relative; }
+.grip { position: absolute; top: 0; bottom: 0; right: calc(var(--panel-w, clamp(320px, 31vw, 430px)) - 5px); width: 11px; z-index: 6; cursor: col-resize; touch-action: none; display: grid; place-items: center; }
+.grip::after { content: ""; width: 5px; height: 44px; border-radius: 3px; background: var(--rule); border: 1px solid var(--surface); }
+.grip:hover::after, .grip:focus-visible::after, .grip.on::after { background: var(--ink); }
+.grip:hover, .grip.on { background: linear-gradient(to right, transparent 4px, var(--muted) 4px, var(--muted) 6px, transparent 6px); }
+.stage { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; border-right: 1px solid var(--rule); }
+
+/* ---------- map ---------- */
+.mapwrap { position: relative; min-height: 0; overflow: hidden; }
+#map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#map.drag { cursor: grabbing; }
+#map.point { cursor: pointer; }
+.tip { position: absolute; z-index: 4; max-width: 300px; padding: 6px 9px; border-radius: 6px; background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.35; pointer-events: none; transform: translate(-50%, -100%); margin-top: -12px; }
+.tip small { display: block; opacity: .7; font-size: 11px; margin-top: 1px; }
+.tip[hidden] { display: none; }
+.legend { position: absolute; left: 12px; bottom: 10px; z-index: 3; display: flex; flex-wrap: wrap; gap: 4px; max-width: calc(100% - 450px); }
+.legend button { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-size: 12px; color: var(--muted); }
+.legend button i { width: 8px; height: 8px; border-radius: 50%; }
+.legend button:hover { color: var(--ink); }
+.legend .age { align-self: center; margin-left: 6px; font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+.legend button[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); font-weight: 600; }
+.climate { position: absolute; left: 12px; top: 12px; z-index: 3; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: calc(100% - 70px); padding: 5px 10px 5px 5px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); font-size: 12px; color: var(--muted); }
+.climate button { border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); padding: 3px 10px; font-size: 12px; color: var(--muted); min-width: 68px; }
+.climate button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.climate label { display: inline-flex; align-items: center; gap: 6px; }
+.climate input { width: 84px; accent-color: var(--muted); }
+.climate output { min-width: 1.8em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.reada { position: absolute; right: 12px; bottom: 10px; z-index: 3; display: flex; align-items: center; gap: 6px; }
+.reada .pill { background: var(--surface); padding: 4px 12px; font-size: 12.5px; }
+.reada .pill[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.reada .seg > * { font-size: 12px; padding: 4px 9px; }
+.reada .step { padding: 1px 11px 3px; font-size: 17px; line-height: 1.2; }
+.paths { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0 0 6px; }
+.paths button { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; text-align: left; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); font-size: 12.5px; line-height: 1.3; color: var(--ink); }
+.paths button:hover { border-color: var(--ink); }
+.paths button.near { border-style: dashed; color: var(--muted); }
+.paths button span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.paths button:disabled { opacity: .4; cursor: default; }
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
+.transport .pill { background: var(--bg); padding: 4px 12px; font-size: 12.5px; }
+.transport .pill[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.transport .step { padding: 1px 11px 3px; font-size: 17px; line-height: 1.2; }
+.transport .back { margin-left: auto; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.meta .chip { font-size: 11.5px; padding: 1px 8px; }
+button.chip { cursor: pointer; }
+button.chip:hover { border-color: var(--ink); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 4px 0 14px; }
+.actions .open, .actions .fold2 { margin: 0; }
+.actions .back { margin-left: auto; }
+.count { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; margin-left: 4px; }
+.meta .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tag-picker { width: min(540px, calc(100% - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); color: var(--ink); }
+.tag-picker::backdrop { background: rgb(13 20 30 / .49); }
+.tag-picker form { display: flex; flex-direction: column; max-height: calc(100dvh - 26px); }
+.tag-picker header, .tag-picker footer { padding: 16px 20px; }
+.tag-picker h2 { margin: 0 0 4px; font: 400 26px/1.2 var(--serif); }
+.tag-picker p { margin: 0 0 12px; color: var(--muted); }
+.tag-picker input[type="search"] { width: 100%; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); }
+.tag-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; min-height: 0; overflow-y: auto; padding: 4px 20px; }
+.tag-options label { display: flex; align-items: center; gap: 6px; min-height: 34px; overflow-wrap: anywhere; cursor: pointer; }
+.tag-options label[hidden] { display: none; }
+.tag-options input { flex: none; accent-color: var(--ink); }
+.tag-options small { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tag-picker #tagEmpty { padding: 0 20px; }
+.tag-picker footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px solid var(--rule); }
+.tag-picker footer .pill { padding: 5px 12px; }
+.tag-picker #tagApply { margin-left: auto; background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tag-picker output { color: var(--muted); font-size: 12px; }
+@media (max-width: 480px) {
+  .tag-options { grid-template-columns: 1fr; }
+  .tag-picker header, .tag-picker footer, .tag-options { padding-inline: 12px; }
+}
+
+/* ---------- presenting: the reader becomes a slide, the map a side rail ---------- */
+.deckbar { display: none; }
+body.present .top, body.present .strip, body.present .climate, body.present .legend, body.present .zoom, body.present .reada,
+body.present .grip, body.present .transport, body.present #pathbox, body.present .actions .fold2, body.present .actions .back,
+body.present .relblock, body.present #morebtn { display: none !important; }
+body.present .app { display: block; height: auto; }
+body.present .main { display: grid; grid-template-columns: minmax(0, 1fr) min(27vw, 400px); height: calc(100dvh - 52px); }
+body.present .panel { order: 1; background: var(--bg); padding: 7vh 6vw 20vh; overflow-y: auto; }
+body.present .stage { order: 2; display: block; border-right: 0; border-left: 1px solid var(--rule); }
+body.present .mapwrap { height: 100%; }
+body.present .panel > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
+body.present .panel .meta { font-size: clamp(14px, 1.25vw, 20px); }
+body.present .panel .meta .chip { font-size: clamp(12px, 1vw, 16px); padding: 2px 10px; }
+body.present .panel h2 { font-size: clamp(30px, 4.2vw, 62px); line-height: 1.1; margin-top: 0.35em; margin-bottom: 0.5em; letter-spacing: -0.015em; }
+body.present .panel h2.long { font-size: clamp(24px, 2.9vw, 42px); line-height: 1.18; }
+body.present .body { font-size: clamp(19px, 1.85vw, 30px); line-height: 1.5; }
+body.present .body .lede { font-size: 1.12em; }
+body.present .body.clip { max-height: none; -webkit-mask-image: none; mask-image: none; }
+body.present .open { font-size: clamp(13px, 1.1vw, 18px); }
+body.present .deckbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; height: 52px; z-index: 25; align-items: center; gap: 8px; padding: 0 18px; border-top: 1px solid var(--rule); background: var(--surface); font-size: 13px; color: var(--muted); }
+.deckbar .subject { color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.deckbar .sp { flex: 1; }
+.deckbar .pill { background: var(--bg); padding: 4px 12px; }
+.deckbar .pill[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.deckbar .step { padding: 1px 12px 3px; font-size: 17px; line-height: 1.2; }
+.deckbar .seg > * { font-size: 12px; padding: 4px 9px; }
+.deckbar #deckCount { font-variant-numeric: tabular-nums; min-width: 6em; text-align: center; }
+@media (max-width: 900px) {
+  body.present .main { display: block; height: auto; }
+  body.present .stage { border-left: 0; }
+  body.present .mapwrap { height: 22vh; min-height: 0; }
+  body.present .panel { padding: 20px 16px 90px; overflow: visible; }
+  body.present .deckbar .seg, body.present .deckbar #dfull, body.present .deckbar .subject { display: none; }
+}
+@media (max-width: 480px) {
+  body.present .deckbar { gap: 4px; padding-inline: 8px; }
+  .deckbar .sp { display: none; }
+  .deckbar .pill { padding-inline: 7px; }
+  .deckbar #deckCount { flex: 1; min-width: 0; font-size: 11px; }
+}
+.fold2 { border: 0; background: none; padding: 0; margin: 0 0 8px; font-size: 12.5px; color: var(--muted); }
+.fold2:hover { color: var(--ink); }
+.pathnote { color: var(--faint); font-size: 12px; margin: 0 0 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+.zoom { position: absolute; right: 12px; top: 12px; z-index: 3; display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.zoom button { width: 30px; height: 30px; border: 0; background: none; color: var(--muted); font-size: 17px; line-height: 1; }
+.zoom button + button { border-top: 1px solid var(--rule); }
+.zoom button:hover { color: var(--ink); background: var(--bg); }
+.zoom svg { width: 14px; height: 14px; vertical-align: -2px; }
+.status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); padding: 24px; text-align: center; }
+.status[hidden] { display: none; }
+
+/* ---------- time strip ---------- */
+.strip { border-top: 1px solid var(--rule); background: var(--surface); padding: 8px 14px 6px; }
+.striphead { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; min-height: 24px; }
+.striphead strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.striphead .sp { margin-left: auto; }
+.pill { white-space: nowrap; border: 1px solid var(--rule); background: var(--surface); border-radius: 999px; padding: 2px 10px; font-size: 12px; color: var(--muted); }
+.pill:hover { color: var(--ink); border-color: var(--ink); }
+#time { display: block; width: 100%; height: 58px; touch-action: none; cursor: crosshair; user-select: none; }
+#time text { font: 10.5px var(--sans); fill: var(--faint); }
+#time .tot { fill: var(--empty); }
+#time .act { fill: var(--muted); }
+#time .in { fill: var(--ink); }
+#time .brush { fill: var(--ink); opacity: .08; }
+#time .edge { stroke: var(--ink); stroke-width: 1; }
+
+/* ---------- panel ---------- */
+.panel { min-height: 0; overflow-y: auto; background: var(--surface); padding: 16px 20px 60px; }
+.panel h2 { font: 400 22px/1.25 var(--serif); margin: 6px 0 8px; letter-spacing: -0.005em; }
+.panel .lead { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+.panel h3 { font: 600 12.5px/1.3 var(--sans); margin: 22px 0 6px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.back { border: 0; background: none; padding: 0; color: var(--muted); font-size: 12.5px; }
+.back:hover { color: var(--ink); text-decoration: underline; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; font-size: 12px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); color: var(--ink); }
+.chip .x { color: var(--faint); font-size: 14px; line-height: 1; }
+.chip:hover .x { color: var(--ink); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; }
+.kicker { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.terms { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+
+.topics { list-style: none; margin: 0; padding: 0; }
+.topics button { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; padding: 5px 0; border: 0; background: none; text-align: left; }
+.topics svg { width: 54px; height: 18px; display: block; }
+.topics .nm { font-family: var(--serif); font-size: 15px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topics .nm small { font-family: var(--sans); font-size: 12px; color: var(--faint); margin-left: 6px; }
+.topics .n { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+.topics button:hover .nm { text-decoration: underline; }
+.topics button.zero { opacity: .4; }
+
+.rows { list-style: none; margin: 0; padding: 0; }
+.rows button { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 2px 10px; width: 100%; padding: 6px 0; border: 0; background: none; text-align: left; align-items: baseline; }
+.rows .d { color: var(--faint); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rows .t { font-family: var(--serif); font-size: 15px; line-height: 1.33; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.rows .t b { font: 600 12.5px var(--sans); color: var(--muted); margin-right: 5px; }
+.rows .m { grid-column: 2; color: var(--faint); font-size: 11.5px; }
+.rows button:hover .t { text-decoration: underline; }
+.rows button.seen .t { color: var(--muted); }
+.more { margin-top: 10px; }
+
+.open { display: inline-block; margin: 4px 0 14px; padding: 6px 12px; border: 1px solid var(--ink); border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; }
+.open:hover { background: var(--ink); color: var(--surface); }
+.body { font-family: var(--serif); font-size: 15.5px; line-height: 1.6; overflow-wrap: anywhere; }
+.body p { margin: 0 0 0.9em; }
+.body .lede { font-size: 17px; }
+.body p.short { margin-bottom: 0.35em; }
+.body.clip { max-height: 24em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--muted); font-size: 12.5px; text-decoration: underline; }
+.linkbtn:hover { color: var(--ink); }
+.note { color: var(--muted); font-size: 13px; }
+.note b { color: var(--ink); font-weight: 600; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; font-size: 12.5px; color: var(--muted); margin: 0; }
+.keys dd { margin: 0; }
+.foot { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--faint); font-size: 12px; }
+.foot a { color: var(--muted); }
+
+/* ---------- narrow screens: map on top, panel below ---------- */
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  .app { display: block; height: auto; }
+  .main { display: block; }
+  .grip { display: none; }
+  .stage { display: block; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; right: 12px; max-width: none; }
+  .reada { bottom: 44px; }
+  .legend button { flex: none; }
+  .striphead .hint2 { display: none; }
+  .climate input { width: 60px; }
+  .climate { gap: 8px; }
+  .mapwrap { height: 46vh; min-height: 260px; }
+  .top { padding: 10px 14px; gap: 10px; }
+  .brand .sub, .search .hint { display: none; }
+  .panel { padding: 14px 14px 60px; overflow: visible; }
+  #time { height: 46px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="top">
+  <div class="brand">
+    <h1><a href="atlas_v10.html">AI Updates atlas</a></h1>
+    <span class="sub" id="sub">Loading the archive</span>
+  </div>
+  <label class="search">
+    <span class="sr-only">Search titles and full text</span>
+    <input id="q" type="search" placeholder="Search titles and full text" autocomplete="off" spellcheck="false">
+    <span class="hint"><kbd>/</kbd></span>
+  </label>
+  <nav class="toplinks">
+    <div class="seg" role="group" aria-label="View">
+      <span aria-current="page">Map</span><a href="atlas.html" id="toLedger" title="Categories by week, with a reader">Ledger</a><a href="index.html" title="The chronological list with full descriptions">List</a>
+    </div>
+    <button class="iconbtn" id="theme" type="button" aria-label="Switch to dark mode"></button>
+  </nav>
+</header>
+
+<div class="main">
+  <div class="stage">
+    <div class="mapwrap" id="mapwrap">
+      <canvas id="map" role="img" aria-label="A moving map of the saved links. Each dot is a link, held near the links whose words it shares. The names of what has gathered are listed as buttons in the panel."></canvas>
+      <div class="tip" id="tip" hidden></div>
+      <div class="climate" role="group" aria-label="How the map moves">
+        <button type="button" id="drift" aria-pressed="true" title="Let reach and pull wander by themselves, or hold the map still">Drifting</button>
+        <label title="How many of its closest links each link holds on to">Reach <input type="range" id="pk" min="2" max="14" step="1" value="8"><output id="pkv">8</output></label>
+        <label title="How hard each link holds its neighbours">Pull <input type="range" id="pp" min="50" max="180" step="1" value="100"><output id="ppv">1.0</output></label>
+      </div>
+      <div class="reada" role="group" aria-label="Read along">
+        <button type="button" class="pill step" id="prev" aria-label="Previous link" title="Back to the previous link (b)">‹</button>
+        <button type="button" class="pill" id="auto" aria-pressed="false" title="Open links one after another. Space starts and pauses.">▶ Read along</button>
+        <button type="button" class="pill step" id="next" aria-label="Next link" title="On to the next link (n)">›</button>
+        <button type="button" class="pill" id="presentBtn" title="Show the current selection as slides, one link at a time">Present</button>
+        <div class="seg" role="group" aria-label="Which link comes next"><button type="button" data-auto="theme" aria-pressed="true" title="Next is a link tied to this one, favouring recent ones. Choosing this moves on at once.">by theme</button><button type="button" data-auto="date" aria-pressed="false" title="Next is the newest link not yet read. Choosing this moves on at once.">by date</button></div>
+      </div>
+      <div class="legend" id="legend" role="group" aria-label="Colour: category family. Select one to show only that family."></div>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button type="button" id="zin" aria-label="Zoom in">+</button>
+        <button type="button" id="zout" aria-label="Zoom out">−</button>
+        <button type="button" id="zfit" aria-label="Show the whole map" title="Show the whole map"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg></button>
+      </div>
+      <div class="status" id="status">Loading the archive…</div>
+    </div>
+    <section class="strip" aria-label="Time">
+      <div class="striphead">
+        <span id="period"></span>
+        <span class="sp"></span>
+        <button class="pill" id="clearTime" type="button" hidden>All dates</button>
+        <button class="pill" id="play" type="button" aria-pressed="false" title="Start from the first weeks and let the archive arrive week by week">Grow from the start</button>
+      </div>
+      <svg id="time" role="img" aria-label="Links saved per week, newest on the left. Drag across the bars to choose a period."></svg>
+    </section>
+  </div>
+  <div class="grip" id="grip" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Width of the reading pane. Drag, or use the left and right arrow keys." title="Drag to make the reading pane wider or narrower"></div>
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+
+</div>
+
+<div class="deckbar" id="deckbar" role="group" aria-label="Presentation">
+  <span class="subject" id="deckSubject"></span>
+  <span class="sp"></span>
+  <button type="button" class="pill step" id="dprev" aria-label="Previous slide" title="Previous (left arrow, Page Up)">‹</button>
+  <button type="button" class="pill" id="dauto" aria-pressed="false" title="Advance by itself (Space)">▶ Read along</button>
+  <button type="button" class="pill step" id="dnext" aria-label="Next slide" title="Next (right arrow, Page Down)">›</button>
+  <span id="deckCount"></span>
+  <div class="seg" role="group" aria-label="Which link comes next"><button type="button" data-auto="date" aria-pressed="false" title="Next is the newest link not yet shown">by date</button><button type="button" data-auto="theme" aria-pressed="true" title="Next is a link tied to this one">by theme</button></div>
+  <span class="sp"></span>
+  <button type="button" class="pill" id="deckTags" data-choose-tags aria-haspopup="dialog">Tags</button>
+  <button type="button" class="pill" id="dfull" title="Full screen (f)">Full screen</button>
+  <button type="button" class="pill" id="dexit" title="Leave the presentation (Esc)">Exit</button>
+</div>
+
+<dialog class="tag-picker" id="tagPicker" aria-labelledby="tagTitle" aria-describedby="tagHelp">
+  <form id="tagForm">
+    <header>
+      <h2 id="tagTitle">Choose tags</h2>
+      <p id="tagHelp">Links can match any of the selected tags.</p>
+      <label class="sr-only" for="tagSearch">Find a tag</label>
+      <input id="tagSearch" type="search" placeholder="Find a tag" autocomplete="off" autofocus>
+    </header>
+    <div class="tag-options" id="tagOptions" role="group" aria-label="Archive tags"></div>
+    <p id="tagEmpty" hidden>No matching tags.</p>
+    <footer>
+      <output id="tagCount" aria-live="polite"></output>
+      <button type="button" class="pill" id="tagClear">Clear all</button>
+      <button type="button" class="pill" id="tagCancel">Cancel</button>
+      <button type="submit" class="pill" id="tagApply">Apply tags</button>
+    </footer>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   CATEGORY MAPPING: same block as atlas.html. Edit both when tags change.
+   Families give the dot colours. The names on the map do NOT come from
+   these tags: they are read from the words of the entries themselves.
+   ===================================================================== */
+const FAMILIES = [
+  { key: 'machines', name: 'Machines', tags: ['Foundation-Models', 'Research-into-AI', 'Applied-AI', 'Tech', 'Robotics', 'Quantum', 'AR-VR'] },
+  { key: 'minds', name: 'Minds and bodies', tags: ['Consciousness', 'BCI', 'Med'] },
+  { key: 'world', name: 'World', tags: ['Governance', 'Economy', 'War', 'Ethics', 'Alignment', 'Edu', 'Ecology'] },
+  { key: 'art', name: 'Art and narrative', tags: ['AI-Art-Research', 'Liferature', 'Watching'] },
+  { key: 'misc', name: 'Misc', tags: ['Observations', 'Theory', 'Tangents'] },
+];
+const LABEL = {
+  'Foundation-Models': 'Foundation models', 'Research-into-AI': 'Research into AI', 'Applied-AI': 'Applied AI',
+  'AR-VR': 'AR / VR', 'BCI': 'Brain implants', 'Med': 'Medical', 'Edu': 'Education', 'AI-Art-Research': 'AI art research',
+};
+const ALIAS = {
+  'ar': 'AR-VR', 'vr': 'AR-VR', 'xr': 'AR-VR', 'ar/vr': 'AR-VR', 'consciousnesses': 'Consciousness',
+  'ehtics': 'Ethics', 'onservations': 'Observations', 'observation': 'Observations', 'literature': 'Liferature',
+  'applied': 'Applied-AI', 'ap': 'Applied-AI', 'economy"': 'Economy',
+};
+const DROP = new Set(['xdn', 'ai']);
+/* ---- end of category mapping ---- */
+const UNSORTED = { key: 'other', name: 'Unsorted', tags: [] };
+const NOCAT = 'No-category';
+LABEL[NOCAT] = 'No category';
+const TAG_FAMILY = {}; const CANON = {};
+FAMILIES.forEach(f => f.tags.forEach(t => { TAG_FAMILY[t] = f.key; CANON[t.toLowerCase()] = t; }));
+const label = t => LABEL[t] || t;
+
+/* =====================================================================
+   MAP SETTINGS
+   ===================================================================== */
+const SEED = 20260713;
+const LEGEND_SKIP = new Set(['misc', 'other']); // families left out of the row of colour buttons (their dots keep their colour)
+// Names on the map are chosen only from: your own categories with more than TAG_MIN links, words
+// found in at least WORD_SHARE of all links, and pairs of words found in at least PAIR_MIN links.
+// This keeps one-off names and incidental words from being written across the map.
+const TAG_MIN = 20, WORD_SHARE = 0.004, PAIR_MIN = 12, TAG_BOOST = 1; // raise TAG_BOOST above 1 to favour categories over words
+const KMAX = 14;                // neighbours remembered for each link; "Reach" chooses how many of them pull
+// Names that are never shown as a label on the map. Add others here, in lowercase.
+const NEVER = new Set(['trump', 'donald']);
+// Words too general to name a place on their own (they can still be part of a pair, as in "world model").
+const VAGUE = new Set('model models technology tech real actually personal university company companies think next human humans work world data system systems tool tools future power open pro create free build way made know best better good great full high low top long via according'.split(' '));
+// Forces. Distances are in map units; one unit is roughly the gap between two neighbouring dots.
+const F = {
+  pull: 0.06,     // spring between a link and each of its neighbours
+  slack: 5,       // beyond this distance the spring stops growing stronger, so far-apart neighbours do not crush the map
+  near: 0.5,      // push between any two links that come close, so dots do not sit on top of each other
+  far: 0.004,     // faint push from every other part of the map (computed on a coarse grid)
+  grid: 14,       // cells per side of that grid
+  centre: 0.004,  // gentle pull towards the middle, which keeps loose links from drifting off
+  step: 0.5, damp: 0.8, vmax: 1.4,
+};
+
+/* =====================================================================
+   Helpers
+   ===================================================================== */
+const STOP = new Set(('a about above after again against all also am an and any are as at be because been before being below between both but by can could did do does doing down during each few for from further had has have having he her here hers him his how i if in into is it its itself just me more most my no nor not now of off on once only or other our ours out over own same she should so some such than that the their them then there these they this those through to too under until up very was we were what when where which while who whom why will with would you your yours new news via one two three first using used use make makes made like get gets got may might many much well way ways says said say according year years today week time let lets per within without across around dont cant isnt amp nbsp www http https com org html youtube video watch post thread show shows see read inc ltd even still yet onto upon really based introducing introduces introduce announcing launch launches launched latest every take takes big help helps need needs want wants including include includes thing things part look looks people paper study research researchers ai artificial intelligence january february march april june july august september october november december jan feb mar apr jun jul aug sep sept oct nov dec monday tuesday wednesday thursday friday saturday sunday tldr abstract arxiv nature guardian york times phys reuters bloomberg techcrunch verge wired journal published communications exclusive authors article npj digital magazine').split(/\s+/));
+
+const CASE = new Map(); // lowercase word -> Map(spelling as written -> count), to show labels as people write them
+function tokenize(s) {
+  const out = [];
+  const re = /[A-Za-z][A-Za-z0-9'’-]*[A-Za-z0-9]|[A-Za-z]/g;
+  let m;
+  while ((m = re.exec(s))) {
+    const raw = m[0].replace(/[’']s$/i, '').replace(/[’']/g, '');
+    const w = raw.toLowerCase();
+    if (w.length < 3 || STOP.has(w)) { out.push(null); continue; } // nulls keep positions so pairs don't jump over stopwords
+    out.push(w);
+    let c = CASE.get(w); if (!c) CASE.set(w, c = new Map());
+    c.set(raw, (c.get(raw) || 0) + 1);
+  }
+  return out;
+}
+function shown(w) {
+  const c = CASE.get(w); if (!c) return w;
+  let best = w, bn = 0, total = 0;
+  for (const [f, n] of c) { total += n; if (n > bn) { bn = n; best = f; } }
+  // A word that is mostly capitalised only because it starts titles is shown in lowercase.
+  if (/^[A-Z][a-z]+$/.test(best) && (c.get(w) || 0) >= total * 0.25) return w;
+  return best;
+}
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeHref = u => /^https?:\/\//i.test(u) ? u : '#';
+function domainOf(u) { const m = /^https?:\/\/([^\/?#]+)/i.exec(u || ''); return m ? m[1].replace(/^www\./, '').toLowerCase() : ''; }
+const fmtN = n => n.toLocaleString('en-GB');
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmtDate = d => `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+const fmtShort = d => `${d.getDate()} ${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function mondayOf(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const $ = id => document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Posts from X arrive with the whole post as their title: show the author and the first sentence.
+function shortTitle(title) {
+  let t = title, who = '';
+  const m = /^(.{1,48}?) on X: ["“”]?([\s\S]*)$/.exec(t);
+  if (m) { who = m[1]; t = m[2].replace(/["“”]\s*$/, ''); }
+  const full = t.length > 400 ? t.slice(0, 400).replace(/\s+\S*$/, '') + '…' : t; // lists and the reader show this; their width decides how much fits
+  if (t.length > 120) {
+    const cut = t.slice(0, 120);
+    const p = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('? '), cut.lastIndexOf('! '));
+    t = p > 40 ? cut.slice(0, p + 1) : cut.replace(/\s+\S*$/, '') + '…';
+  }
+  return { who, t: t || title, full: full || title };
+}
+
+/* =====================================================================
+   State
+   ===================================================================== */
+let E = [], BYID = new Map(), N = 0, WEEKS = [];
+const DF = new Map();     // term -> number of entries containing it (single words and pairs)
+const POST = new Map();   // word -> [entryIndex, weight, ...]
+let X, Y, VX, VY, FX, FY; // position, velocity, force per entry
+let AGE;                  // 0 newest .. 3 oldest: older links are drawn fainter
+let FAM, ST, ALIVE;       // family index; display state (0 faint, 1 outside chosen place, 2 in); alive in the chosen period
+let NB, NW, nbDone = 0;   // neighbours and their weights, found progressively after load
+let TERMS = [], TERM_NAME = [], TERM_DF = [], TERM_PAIR = []; // per entry: ids of the words and pairs that may name a place
+let SEEN = new Set();
+const S = { q: '', fam: '', tags: new Set(), w0: null, w1: null, place: null, sel: null };
+let TAGN = new Map();     // category -> number of links
+let PRESENT = false;      // showing the selection as slides
+const P = { k: 8, pull: 1, drift: !reduced }; // the climate: reach, pull, and whether they wander by themselves
+let heat = 1;             // rises when something changes, falls as the map settles
+let ftIds = null;
+let LIST = [];
+let REL = [];
+let aliveN = 0;
+let READ = new Set(), readVersion = 0; // every link opened this visit; paths and read-along pass over these
+let TRAIL = [];           // the links opened, in order: the reading path drawn on the map
+let track = false;        // keep the open link in the middle of the view while reading along a path
+const AUTO = { on: false, mode: 'theme', t: 0, dwell: 7, seen: new Set() }; // read along: seconds spent on each link
+
+/* =====================================================================
+   Load + index
+   ===================================================================== */
+function canonTags(raw) {
+  const parts = String(raw || '').split(',').map(s => s.trim()).filter(Boolean);
+  const out = [], extra = [];
+  for (const p of parts) {
+    const k = p.toLowerCase();
+    if (DROP.has(k)) continue;
+    const c = CANON[k] || ALIAS[k];
+    if (c) { if (!out.includes(c)) out.push(c); }
+    else if (parts.length <= 8 && /^[A-Za-z][\w'’-]{1,24}$/.test(p)) extra.push(p);
+  }
+  return { tags: out, extra };
+}
+// Tags missing from the mapping go to an "Unsorted" family; spellings differing only in case are merged.
+function addUnsorted() {
+  const n = new Map(), spell = new Map();
+  for (const e of E) for (const t of e.extra) {
+    const k = t.toLowerCase();
+    n.set(k, (n.get(k) || 0) + 1);
+    const sp = spell.get(k) || new Map(); sp.set(t, (sp.get(t) || 0) + 1); spell.set(k, sp);
+  }
+  const best = new Map();
+  for (const [k, sp] of spell) best.set(k, Array.from(sp).sort((a, b) => b[1] - a[1])[0][0]);
+  let none = 0;
+  for (const e of E) {
+    for (const t of e.extra) { const c = best.get(t.toLowerCase()); if (!e.tags.includes(c)) e.tags.push(c); }
+    delete e.extra;
+    if (!e.tags.length) { e.tags.push(NOCAT); none++; }
+  }
+  const order = Array.from(n).sort((a, b) => b[1] - a[1]).map(([k]) => best.get(k));
+  if (none) order.push(NOCAT);
+  UNSORTED.tags = order;
+  if (order.length) FAMILIES.push(UNSORTED);
+  order.forEach(t => { TAG_FAMILY[t] = UNSORTED.key; });
+}
+
+function build(data) {
+  let minT = Infinity, maxT = -Infinity;
+  E = (data.entries || []).map((r, i) => {
+    const [id, unix, title, summary, link, rawTags] = r;
+    const d = new Date(unix * 1000);
+    const { tags, extra } = canonTags(rawTags);
+    minT = Math.min(minT, d.getTime()); maxT = Math.max(maxT, d.getTime());
+    const st = shortTitle(title || '(untitled)');
+    return { i, id, d, title: title || '(untitled)', who: st.who, st: st.t, full: st.full, summary: summary || '', link, tags, extra,
+             dom: domainOf(link), hay: ((title || '') + ' ' + (summary || '')).toLowerCase() };
+  });
+  N = E.length;
+  BYID = new Map(E.map(e => [e.id, e]));
+  addUnsorted();
+
+  // dot colour: the family of the entry's rarest tag (the most specific thing said about it)
+  const tagN = new Map();
+  for (const e of E) for (const t of e.tags) tagN.set(t, (tagN.get(t) || 0) + 1);
+  TAGN = tagN;
+  const famIndex = {}; FAMILIES.forEach((f, k) => { famIndex[f.key] = k; });
+  FAM = new Uint8Array(N);
+  for (const e of E) {
+    let best = e.tags[0];
+    for (const t of e.tags) if (tagN.get(t) < tagN.get(best)) best = t;
+    FAM[e.i] = famIndex[TAG_FAMILY[best]] ?? famIndex.other ?? 0;
+  }
+
+  // weeks
+  const first = mondayOf(new Date(minT)), last = mondayOf(new Date(maxT));
+  for (let w = new Date(first); w <= last; w.setDate(w.getDate() + 7)) WEEKS.push(new Date(w));
+  const firstMs = first.getTime();
+  for (const e of E) e.w = clamp(Math.round((mondayOf(e.d).getTime() - firstMs) / 6048e5), 0, WEEKS.length - 1);
+
+  // words: title words count double; pairs of adjacent words are kept for naming places
+  for (const e of E) {
+    // the name of whoever posted on X is not what the post is about
+    const tt = tokenize(e.title.replace(/^.{1,48}? on X: /, '')), ss = tokenize(e.summary.replace(/^.{1,48}? on X: /, ''));
+    const src = new Set(e.dom.split('.').slice(0, -1).flatMap(p => [p, p.replace(/^the/, '')]));
+    for (const seq of [tt, ss]) for (let k = 0; k < seq.length; k++) if (seq[k] && src.has(seq[k])) seq[k] = null; // the source's own name says nothing about the subject
+    const tf = new Map();
+    tt.forEach(w => { if (w) tf.set(w, (tf.get(w) || 0) + 2); });
+    ss.forEach(w => { if (w) tf.set(w, (tf.get(w) || 0) + 1); });
+    const pairs = new Set();
+    for (const seq of [tt, ss]) for (let k = 0; k + 1 < seq.length; k++) if (seq[k] && seq[k + 1] && seq[k] !== seq[k + 1]) pairs.add(seq[k] + ' ' + seq[k + 1]);
+    e.tf = tf; e.pairs = pairs;
+    for (const w of tf.keys()) DF.set(w, (DF.get(w) || 0) + 1);
+    for (const p of pairs) DF.set(p, (DF.get(p) || 0) + 1);
+  }
+  const wordMin = Math.max(25, Math.round(N * WORD_SHARE));
+  for (const [t, n] of tagN) DF.set('#' + t, n);
+  const termId = new Map();
+  const tid = (t, pair) => { let k = termId.get(t); if (k === undefined) { k = TERM_NAME.length; termId.set(t, k); TERM_NAME.push(t); TERM_DF.push(DF.get(t)); TERM_PAIR.push(pair); } return k; };
+  for (const e of E) {
+    // tf-idf vector, unit length
+    let norm = 0; const vec = [], ids = [];
+    for (const [w, c] of e.tf) {
+      const df = DF.get(w);
+      if (df >= wordMin && df <= N * 0.2 && !VAGUE.has(w) && !NEVER.has(w)) ids.push(tid(w, 0));
+      if (df < 2 || df > N * 0.25) continue;
+      const wt = (1 + Math.log(c)) * Math.log(N / df);
+      vec.push([w, wt]); norm += wt * wt;
+    }
+    for (const p of e.pairs) if (DF.get(p) >= PAIR_MIN && !p.split(' ').some(w => NEVER.has(w))) ids.push(tid(p, 1));
+    for (const t of e.tags) if (t !== NOCAT && tagN.get(t) > TAG_MIN) ids.push(tid('#' + t, 2)); // a category can name a place too
+    norm = Math.sqrt(norm) || 1;
+    e.vec = vec.map(([w, wt]) => [w, wt / norm]);
+    for (const [w, wt] of e.vec) { let p = POST.get(w); if (!p) POST.set(w, p = []); p.push(e.i, wt); }
+    TERMS.push(Int32Array.from(ids));
+    delete e.tf; delete e.pairs;
+  }
+  const a = new Date(minT), b = new Date(maxT);
+  $('sub').textContent = `${fmtN(N)} links, ${MONTHS[a.getMonth()]} ${a.getFullYear()} to ${fmtDate(b)}`;
+
+  // age bands, counted back from the newest link: two months, six months, a year, older
+  AGE = new Uint8Array(N);
+  for (const e of E) { const days = (maxT - e.d.getTime()) / 864e5; AGE[e.i] = days <= 60 ? 0 : days <= 180 ? 1 : days <= 365 ? 2 : 3; }
+
+  // everything starts scattered; the form comes from the links finding each other
+  const rand = rng(SEED), R0 = Math.sqrt(N) * 0.9;
+  X = new Float32Array(N); Y = new Float32Array(N); VX = new Float32Array(N); VY = new Float32Array(N);
+  FX = new Float32Array(N); FY = new Float32Array(N);
+  for (let i = 0; i < N; i++) { const a2 = rand() * 6.2832, r = Math.sqrt(rand()) * R0; X[i] = Math.cos(a2) * r * 1.3; Y[i] = Math.sin(a2) * r; }
+  NB = new Int32Array(N * KMAX).fill(-1); NW = new Float32Array(N * KMAX);
+  ST = new Uint8Array(N).fill(2); ALIVE = new Uint8Array(N).fill(1); aliveN = N;
+}
+
+/* =====================================================================
+   Neighbours: for each link, the links whose words it shares most.
+   Found a few hundred at a time so the page stays responsive; the map
+   takes shape as they are found.
+   ===================================================================== */
+function requestDraw() { if (!running) draw(); }
+let ACC = null;
+function findNeighbours(budgetMs) {
+  if (nbDone >= N) return;
+  if (!ACC) ACC = new Float32Array(N);
+  const t0 = performance.now(), cap = Math.floor(N * 0.1) * 2;
+  while (nbDone < N && performance.now() - t0 < budgetMs) {
+    const i = nbDone++, e = E[i], acc = ACC, base = i * KMAX;
+    acc.fill(0);
+    for (const [w, wt] of e.vec) { const p = POST.get(w); if (!p || p.length > cap) continue; for (let j = 0; j < p.length; j += 2) acc[p[j]] += wt * p[j + 1]; }
+    let cnt = 0, floor = 0.07;
+    for (let j = 0; j < N; j++) {
+      const s = acc[j];
+      if (s <= floor || j === i) continue;
+      let p = cnt < KMAX ? cnt++ : KMAX - 1;
+      while (p > 0 && NW[base + p - 1] < s) { NB[base + p] = NB[base + p - 1]; NW[base + p] = NW[base + p - 1]; p--; }
+      NB[base + p] = j; NW[base + p] = s;
+      if (cnt === KMAX) floor = NW[base + KMAX - 1];
+    }
+    const top = NW[base] || 1;
+    for (let n = 0; n < cnt; n++) NW[base + n] = 0.35 + 0.65 * NW[base + n] / top; // strongest tie = 1
+  }
+  heat = Math.max(heat, 0.8);
+  if (nbDone >= N) ACC = null;
+}
+
+/* =====================================================================
+   Movement. Each link is pulled towards its neighbours and pushed by the
+   rest of the map. "Reach" is how many neighbours pull (few: fine threads
+   and small knots; many: broad masses). "Pull" is how hard. With Drift on,
+   both wander slowly, so the map keeps reorganising and never settles into
+   one fixed picture.
+   ===================================================================== */
+let gm = null, gx = null, gy = null, hStart = null, hCell = null, hOrder = null, hFill = null;
+function stepSim() {
+  const k = clamp(Math.round(P.k), 1, KMAX), A = F.pull * P.pull, G = F.grid;
+  if (!gm) { gm = new Float32Array(G * G); gx = new Float32Array(G * G); gy = new Float32Array(G * G); }
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = 0; i < N; i++) { if (!ALIVE[i]) continue; const x = X[i], y = Y[i]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x0 === Infinity) return;
+  const cwid = Math.max(1e-3, (x1 - x0) / G * 1.0001), chgt = Math.max(1e-3, (y1 - y0) / G * 1.0001);
+  gm.fill(0); gx.fill(0); gy.fill(0);
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i]) continue;
+    const c = Math.floor((X[i] - x0) / cwid) + G * Math.floor((Y[i] - y0) / chgt);
+    gm[c]++; gx[c] += X[i]; gy[c] += Y[i];
+  }
+  const cells = [];
+  for (let c = 0; c < G * G; c++) if (gm[c]) { gx[c] /= gm[c]; gy[c] /= gm[c]; cells.push(c); }
+  const soft = 0.3 * (cwid * cwid + chgt * chgt) + 0.5, far = F.far, cen = F.centre, nc = cells.length;
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i]) continue;
+    const x = X[i], y = Y[i]; let fx = -cen * x, fy = -cen * y;
+    for (let q = 0; q < nc; q++) { const c = cells[q], dx = x - gx[c], dy = y - gy[c], f = far * gm[c] / (dx * dx + dy * dy + soft); fx += dx * f; fy += dy * f; }
+    FX[i] = fx; FY[i] = fy;
+  }
+  const L2 = F.slack * F.slack;
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i]) continue;
+    const base = i * KMAX;
+    for (let n = 0; n < k; n++) {
+      const j = NB[base + n]; if (j < 0) break; if (!ALIVE[j]) continue;
+      const dx = X[j] - X[i], dy = Y[j] - Y[i], f = A * NW[base + n] / (1 + (dx * dx + dy * dy) / L2);
+      FX[i] += dx * f; FY[i] += dy * f; FX[j] -= dx * f; FY[j] -= dy * f;
+    }
+  }
+  // close-range push between any links that are near each other, found with a fine grid
+  const cs = 2.2, gw = Math.min(360, Math.floor((x1 - x0) / cs) + 1), gh = Math.min(360, Math.floor((y1 - y0) / cs) + 1), nh = gw * gh;
+  if (!hStart || hStart.length < nh + 1) hStart = new Int32Array(nh + 1);
+  if (!hCell) { hCell = new Int32Array(N); hOrder = new Int32Array(N); }
+  hStart.fill(0, 0, nh + 1);
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i]) continue;
+    const c = Math.min(gw - 1, Math.floor((X[i] - x0) / cs)) + gw * Math.min(gh - 1, Math.floor((Y[i] - y0) / cs));
+    hCell[i] = c; hStart[c + 1]++;
+  }
+  for (let c = 0; c < nh; c++) hStart[c + 1] += hStart[c];
+  if (!hFill || hFill.length < nh) hFill = new Int32Array(nh);
+  hFill.set(hStart.subarray(0, nh));
+  for (let i = 0; i < N; i++) if (ALIVE[i]) hOrder[hFill[hCell[i]]++] = i;
+  const Rn = F.near, CAP = 14;
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i]) continue;
+    const c = hCell[i], cx = c % gw, cy = (c - cx) / gw, x = X[i], y = Y[i];
+    for (let oy = -1; oy <= 1; oy++) {
+      const yy = cy + oy; if (yy < 0 || yy >= gh) continue;
+      for (let ox = -1; ox <= 1; ox++) {
+        const xx = cx + ox; if (xx < 0 || xx >= gw) continue;
+        const cc = xx + gw * yy, end = Math.min(hStart[cc + 1], hStart[cc] + CAP);
+        for (let q = hStart[cc]; q < end; q++) {
+          const j = hOrder[q]; if (j <= i) continue;
+          let dx = x - X[j], dy = y - Y[j]; const d2 = dx * dx + dy * dy;
+          if (d2 > 6) continue;
+          if (d2 < 1e-4) { dx = ((i * 31 + j) % 7 - 3) * 0.01; dy = ((i + j * 17) % 7 - 3) * 0.01; } // two links on the same spot are nudged apart
+          const q2 = 1 + d2, f = Rn / (q2 * q2);
+          FX[i] += dx * f; FY[i] += dy * f; FX[j] -= dx * f; FY[j] -= dy * f;
+        }
+      }
+    }
+  }
+  const dt = F.step * heat * calm, damp = F.damp, vmax = F.vmax * (0.25 + heat) * calm;
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i]) continue;
+    let vx = (VX[i] + FX[i] * dt) * damp, vy = (VY[i] + FY[i] * dt) * damp;
+    const sp = vx * vx + vy * vy;
+    if (sp > vmax * vmax) { const s = vmax / Math.sqrt(sp); vx *= s; vy *= s; }
+    VX[i] = vx; VY[i] = vy; X[i] += vx; Y[i] += vy;
+  }
+}
+let clock = 0, lastK = 8;
+function climate(dtSec) {
+  if (P.drift) {
+    clock += dtSec;
+    P.k = 8 + 5 * Math.sin(clock * 6.2832 / 53);            // reach wanders between 3 and 13
+    P.pull = 1 + 0.4 * Math.sin(clock * 6.2832 / 31 + 1.3);  // pull wanders on a different rhythm, so the two never repeat together
+    syncClimate();
+  }
+  const kNow = Math.round(P.k);
+  if (kNow !== lastK) { lastK = kNow; heat = Math.max(heat, 0.55); }
+  const floor = P.drift ? 0.3 : 0;
+  heat = Math.max(floor, heat * 0.992);
+}
+function syncClimate() {
+  $('pk').value = P.k; $('pkv').textContent = Math.round(P.k);
+  $('pp').value = Math.round(P.pull * 100); $('ppv').textContent = P.pull.toFixed(1);
+  $('drift').setAttribute('aria-pressed', P.drift);
+  $('drift').textContent = P.drift ? 'Drifting' : 'Still';
+}
+function kick(h) { heat = Math.max(heat, h); startLoop(); }
+$('drift').addEventListener('click', () => { P.drift = !P.drift; syncClimate(); kick(0.5); });
+$('pk').addEventListener('input', ev => { P.drift = false; P.k = +ev.target.value; syncClimate(); kick(0.7); });
+$('pp').addEventListener('input', ev => { P.drift = false; P.pull = +ev.target.value / 100; syncClimate(); kick(0.7); });
+
+/* =====================================================================
+   Places: names read off whatever has gathered in each part of the view.
+   Nothing is assigned in advance. The view is divided into patches; each
+   patch with enough links is named by the words that set its links apart
+   from the rest, and neighbouring patches with the same name are joined.
+   Zooming in gives smaller patches and so finer names.
+   ===================================================================== */
+let LABELS = [], labelAt = 0, CNT = null;
+function distinct(members) {
+  if (!CNT) CNT = new Int32Array(TERM_NAME.length);
+  const touched = [], len = members.length;
+  for (let m = 0; m < len; m++) { const ts = TERMS[members[m]]; for (let q = 0; q < ts.length; q++) { if (CNT[ts[q]]++ === 0) touched.push(ts[q]); } }
+  const out = [], need = Math.max(3, len * 0.06);
+  for (const t of touched) {
+    const n = CNT[t]; CNT[t] = 0;
+    if (n < need) continue;
+    const pin = n / len, pout = (TERM_DF[t] - n) / Math.max(1, N - len);
+    out.push([t, pin * Math.log((pin + 1e-4) / (pout + 1e-4)) * (TERM_PAIR[t] === 2 ? TAG_BOOST : TERM_PAIR[t] ? 1.25 : 1)]);
+  }
+  out.sort((a, b) => b[1] - a[1]);
+  if (out.length > 1 && !TERM_PAIR[out[0][0]]) { // prefer "claude code" to "claude" when both describe the place
+    const w = TERM_NAME[out[0][0]];
+    const p = out.findIndex((c, q) => q > 0 && q < 5 && TERM_PAIR[c[0]] === 1 && TERM_NAME[c[0]].split(' ').includes(w) && c[1] >= out[0][1] * 0.55);
+    if (p > 0) { const [it] = out.splice(p, 1); out.unshift(it); }
+  }
+  return out.slice(0, 8).map(c => c[0]);
+}
+const termShown = t => TERM_PAIR[t] === 2 ? label(TERM_NAME[t].slice(1)) : TERM_NAME[t].split(' ').map(shown).join(' ');
+const stemKey = t => TERM_NAME[t].split(' ').map(w => w.slice(0, 5)).join(' ');
+function relabel() {
+  labelAt = performance.now();
+  if (!cw || !aliveN) return;
+  const vw = cw / view.k, g = Math.pow(2, Math.round(Math.log2(vw / 6)));
+  const cells = new Map();
+  for (let i = 0; i < N; i++) {
+    if (!ALIVE[i] || !ST[i]) continue;
+    const key = (Math.floor(X[i] / g) + 2048) * 4096 + Math.floor(Y[i] / g) + 2048;
+    let c = cells.get(key); if (!c) cells.set(key, c = []); c.push(i);
+  }
+  const minN = Math.max(12, Math.round(aliveN * 0.004));
+  const big = [];
+  for (const [key, mem] of cells) if (mem.length >= minN) big.push({ key, mem, top: distinct(mem)[0], parent: null });
+  const byKey = new Map(big.map(b => [b.key, b]));
+  const root = b => { while (b.parent) b = b.parent; return b; };
+  for (const b of big) {
+    if (b.top === undefined) continue;
+    for (const d of [1, 4096, 4097, 4095]) { const o = byKey.get(b.key + d); if (o && o.top === b.top) { const ra = root(b), rb = root(o); if (ra !== rb) rb.parent = ra; } }
+  }
+  const groups = new Map();
+  for (const b of big) { if (b.top === undefined) continue; const r = root(b); let gmem = groups.get(r); if (!gmem) groups.set(r, gmem = []); for (const i of b.mem) gmem.push(i); }
+  const list = Array.from(groups.values()).sort((a, b) => b.length - a.length);
+  const used = new Set(), old = new Map(LABELS.map(l => [l.name, l])), next = [];
+  for (const mem of list) {
+    const cands = distinct(mem);
+    const pick = cands.find(t => !used.has(stemKey(t)));
+    if (pick === undefined) continue;
+    used.add(stemKey(pick));
+    const stems = new Set(TERM_NAME[pick].split(' ').map(w => w.slice(0, 5))), also = [];
+    for (const t of cands) {
+      if (also.length === 2) break;
+      const parts = TERM_NAME[t].split(' ');
+      if (parts.some(w => stems.has(w.slice(0, 5)))) continue;
+      parts.forEach(w => stems.add(w.slice(0, 5))); also.push(termShown(t));
+    }
+    const name = cap(termShown(pick));
+    const prev = old.get(name);
+    next.push({ name, also, mem: Int32Array.from(mem), n: mem.length, alpha: prev ? prev.alpha : 0, want: 1, x: prev ? prev.x : null, y: prev ? prev.y : null, box: null });
+    old.delete(name);
+  }
+  for (const l of old.values()) if (l.alpha > 0.05) { l.want = 0; next.push(l); } // names that no longer apply fade out
+  LABELS = next;
+  if (!PRESENT && S.sel === null && S.place === null && !S.q && !S.tags.size && !panelBusy && !$('panel').contains(document.activeElement)) renderPanel();
+}
+
+/* =====================================================================
+   Map drawing (canvas). screen = world * view.k + view.x / view.y
+   ===================================================================== */
+const cv = $('map'), ctx = cv.getContext('2d');
+let cw = 0, ch = 0, dpr = 1;
+const view = { x: 0, y: 0, k: 1 };
+let follow = true, hoverDot = -1, hoverLabel = null, anim = null, running = false, lastT = 0;
+let COL = {}, BYFAM = [];
+
+function readColours() {
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  COL = { bg: g('--bg'), surface: g('--surface'), ink: g('--ink'), muted: g('--muted'), faint: g('--faint'), rule: g('--rule'),
+          fam: FAMILIES.map(f => g('--' + f.key)), serif: g('--serif'), sans: g('--sans') };
+}
+// the frame that holds most of the living links (a few far-flung ones are allowed to fall outside)
+function frame(members) {
+  let n = 0, sx = 0, sy = 0, sxx = 0, syy = 0;
+  const add = i => { n++; sx += X[i]; sy += Y[i]; sxx += X[i] * X[i]; syy += Y[i] * Y[i]; };
+  if (members) for (let m = 0; m < members.length; m++) add(members[m]);
+  else for (let i = 0; i < N; i++) if (ALIVE[i]) add(i);
+  if (!n) return null;
+  const mx = sx / n, my = sy / n, dx = Math.sqrt(Math.max(1, sxx / n - mx * mx)), dy = Math.sqrt(Math.max(1, syy / n - my * my));
+  const s = members ? 2.4 : 2.3, pad = cw < 500 ? 12 : 30;
+  const k = Math.min((cw - pad * 2) / (dx * 2 * s), (ch - pad * 2 - 30) / (dy * 2 * s));
+  return { k, x: cw / 2 - mx * k, y: (ch - 30) / 2 - my * k };
+}
+function resize() {
+  const r = $('mapwrap').getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const cx = (cw / 2 - view.x) / view.k, cy = (ch / 2 - view.y) / view.k, had = cw;
+  cw = r.width; ch = r.height; dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+  if (!N) return;
+  if (!had || follow) { const f = frame(); if (f) Object.assign(view, f); } else { view.x = cw / 2 - cx * view.k; view.y = ch / 2 - cy * view.k; }
+  draw();
+}
+function flyTo(target) {
+  follow = false;
+  target.k = clamp(target.k, 0.5, 80);
+  if (reduced) { Object.assign(view, target); draw(); return; }
+  const from = { ...view }, t0 = performance.now(), dur = 450;
+  anim = target;
+  const stepFly = now => {
+    if (anim !== target) return;
+    const u = Math.min(1, (now - t0) / dur), s = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    view.k = from.k * Math.pow(target.k / from.k, s);
+    const fx = (cw / 2 - from.x) / from.k, fy = (ch / 2 - from.y) / from.k, tx = (cw / 2 - target.x) / target.k, ty = (ch / 2 - target.y) / target.k;
+    view.x = cw / 2 - (fx + (tx - fx) * s) * view.k; view.y = ch / 2 - (fy + (ty - fy) * s) * view.k;
+    if (!running) draw();
+    if (u < 1) requestAnimationFrame(stepFly); else { anim = null; relabel(); if (!running) draw(); }
+  };
+  requestAnimationFrame(stepFly);
+}
+function reveal(i) {
+  const sx = X[i] * view.k + view.x, sy = Y[i] * view.k + view.y, m = 70;
+  if (sx > m && sx < cw - m && sy > m && sy < ch - m) { if (!running) draw(); return; }
+  flyTo({ k: view.k, x: cw / 2 - X[i] * view.k, y: ch / 2 - Y[i] * view.k });
+}
+
+let frameN = 0, calm = 1;
+function startLoop() { if (running || !N) return; running = true; lastT = performance.now(); requestAnimationFrame(tick); }
+function tick(now) {
+  const dtSec = Math.min(0.1, (now - lastT) / 1000); lastT = now;
+  findNeighbours(7);
+  // The map holds still while the pointer rests on a link or a finger is on the map, and moves
+  // more slowly the further you zoom in, so what you are looking at does not slide away.
+  const hold = hoverDot >= 0 || pts.size > 0;
+  const f0 = frame(); calm = f0 ? clamp(1.6 * f0.k / view.k, 0.12, 1) : 1;
+  if (!hold) { climate(dtSec * calm); if (heat > 0.015) stepSim(); }
+  if (follow && !anim) { const f = f0; if (f) { const e = 0.06; view.k += (f.k - view.k) * e; view.x += (f.x - view.x) * e; view.y += (f.y - view.y) * e; } }
+  if (track && S.sel !== null && !anim) { // the map moves under the reader, so the view keeps the open link centred
+    const i = BYID.get(S.sel).i, tx = cw / 2 - X[i] * view.k, ty = ch / 2 - Y[i] * view.k;
+    view.x += (tx - view.x) * 0.08; view.y += (ty - view.y) * 0.08;
+  }
+  if (AUTO.on && !$('tagPicker').open) { AUTO.t += dtSec; if (AUTO.t >= AUTO.dwell) autoNext(); }
+  if (++frameN % 40 === 0) syncPaths();
+  if (now - labelAt > (heat > 0.6 ? 900 : 2200)) relabel();
+  draw();
+  if (heat <= 0.015 && !P.drift && nbDone >= N && !AUTO.on && !(track && S.sel !== null) && !LABELS.some(l => Math.abs(l.alpha - l.want) > 0.02)) { running = false; relabel(); draw(); return; }
+  requestAnimationFrame(tick);
+}
+
+function draw() {
+  if (!N || !cw) return;
+  const k = view.k, ox = view.x, oy = view.y;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+
+  const rad = clamp(0.41 * k, 1.1, 6.6);
+  const selNow = S.sel !== null ? BYID.get(S.sel) : null, reading = !!(selNow && track && ALIVE[selNow.i]);
+  const hush = reading ? 0.42 : 1; // while reading along a path, the rest of the map steps back
+  const few = LIST.length <= 300 && LIST.length < aliveN; // a small selection is drawn larger so it can be found
+  const alpha = [0.22, 0.38, 1], AGE_ALPHA = [1, 0.74, 0.52, 0.36];
+  for (let state = 0; state < 3; state++) {
+    ctx.globalAlpha = alpha[state];
+    const rr = state === 0 ? Math.max(0.9, rad * 0.8) : state === 2 && few ? Math.max(rad * 1.5, 3.4) : rad;
+    for (let f = 0; f < BYFAM.length; f++) for (let age = 0; age < 4; age++) {
+      const list = BYFAM[f]; let any = false;
+      ctx.globalAlpha = alpha[state] * (state ? AGE_ALPHA[age] : 1) * hush;
+      ctx.beginPath();
+      for (let n = 0; n < list.length; n++) {
+        const i = list[n]; if (ST[i] !== state || AGE[i] !== age || !ALIVE[i]) continue;
+        const sx = X[i] * k + ox, sy = Y[i] * k + oy;
+        if (sx < -rr || sx > cw + rr || sy < -rr || sy > ch + rr) continue;
+        ctx.moveTo(sx + rr, sy); ctx.arc(sx, sy, rr, 0, 6.2832); any = true;
+      }
+      if (any) { ctx.fillStyle = state === 0 ? COL.faint : COL.fam[f]; ctx.fill(); }
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // what has been read this visit is ringed, so the explored part of the map shows
+  if (READ.size) {
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1; ctx.globalAlpha = 0.5; ctx.beginPath();
+    for (const i of READ) { if (!ALIVE[i]) continue; const sx = X[i] * k + ox, sy = Y[i] * k + oy; if (sx < -9 || sx > cw + 9 || sy < -9 || sy > ch + 9) continue; ctx.moveTo(sx + rad + 1.6, sy); ctx.arc(sx, sy, rad + 1.6, 0, 6.2832); }
+    ctx.stroke(); ctx.globalAlpha = 1;
+  }
+  // while reading, everything tied to the open link is brought forward in its own colour
+  if (reading) {
+    const base = selNow.i * KMAX;
+    for (let q = 0; q < KMAX; q++) {
+      const j = NB[base + q]; if (j < 0) break; if (!ALIVE[j]) continue;
+      ctx.beginPath(); ctx.arc(X[j] * k + ox, Y[j] * k + oy, rad * 1.35 + 0.6, 0, 6.2832); ctx.fillStyle = COL.fam[FAM[j]]; ctx.fill();
+    }
+  }
+  // the open entry and the entries closest to it
+  const sel = S.sel !== null ? BYID.get(S.sel) : null;
+  if (sel && ALIVE[sel.i]) {
+    const ax = X[sel.i] * k + ox, ay = Y[sel.i] * k + oy;
+    // the path read so far: older steps fainter
+    ctx.strokeStyle = COL.ink; ctx.lineCap = 'round';
+    for (let s = Math.max(1, TRAIL.length - 40); s < TRAIL.length; s++) {
+      const a = TRAIL[s - 1], b = TRAIL[s]; if (!ALIVE[a] || !ALIVE[b]) continue;
+      ctx.globalAlpha = 0.12 + 0.6 * Math.pow(1 - (TRAIL.length - 1 - s) / 40, 2); ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(X[a] * k + ox, Y[a] * k + oy); ctx.lineTo(X[b] * k + ox, Y[b] * k + oy); ctx.stroke();
+    }
+    // the four ways on from here, one per arrow key: solid if the links share words, dashed if merely nearby
+    const ways = pathTargets(sel.i);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `600 13px ${COL.sans}`; ctx.lineJoin = 'round';
+    for (const name in ways) {
+      const t = ways[name], bx = X[t.j] * k + ox, by = Y[t.j] * k + oy;
+      ctx.globalAlpha = 0.75; ctx.lineWidth = 1.3; ctx.setLineDash(t.linked ? [] : [3, 4]);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
+      ctx.globalAlpha = 1; ring(t.j, rad + 2.5, 1.4);
+      const d = DIRS[name], gx2 = bx + d[0] * (rad + 13), gy2 = by + d[1] * (rad + 13);
+      ctx.strokeStyle = COL.bg; ctx.lineWidth = 4; ctx.strokeText(ARROW[name], gx2, gy2);
+      ctx.fillStyle = COL.ink; ctx.fillText(ARROW[name], gx2, gy2);
+      if (reading && bx > 0 && bx < cw && by > 0 && by < ch) { // and each way on is named, so the map says what lies in each direction
+        const o = E[t.j], txt = (o.st.length > 42 ? o.st.slice(0, 40).replace(/\s+\S*$/, '') + '…' : o.st);
+        ctx.font = `12px ${COL.sans}`;
+        ctx.textAlign = d[0] < 0 ? 'right' : d[0] > 0 ? 'left' : 'center';
+        const lx = gx2 + d[0] * 11, ly = gy2 + d[1] * 15;
+        ctx.lineWidth = 3.5; ctx.strokeText(txt, lx, ly); ctx.fillStyle = t.linked ? COL.ink : COL.muted; ctx.fillText(txt, lx, ly);
+        ctx.textAlign = 'center'; ctx.font = `600 13px ${COL.sans}`;
+      }
+      ctx.strokeStyle = COL.ink;
+    }
+    ctx.globalAlpha = 1;
+    ring(sel.i, rad + 4.5, 2.2, true);
+    if (AUTO.on) { // time left on this link
+      ctx.beginPath(); ctx.arc(ax, ay, rad + 9, -1.5708, -1.5708 + 6.2832 * Math.min(1, AUTO.t / AUTO.dwell));
+      ctx.lineWidth = 2; ctx.strokeStyle = COL.ink; ctx.globalAlpha = 0.8; ctx.stroke(); ctx.globalAlpha = 1;
+    }
+  }
+  if (hoverDot >= 0 && ALIVE[hoverDot]) ring(hoverDot, rad + 3, 1.6, true);
+
+  // names ride on the links they describe; largest first, skipping any that would overlap
+  const placed = [];
+  let maxN = 1; for (const l of LABELS) if (l.want && l.n > maxN) maxN = l.n;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  for (const l of LABELS) {
+    let sx = 0, sy = 0, n = 0; const mem = l.mem;
+    for (let m = 0; m < mem.length; m++) { const i = mem[m]; if (ALIVE[i]) { sx += X[i]; sy += Y[i]; n++; } }
+    if (!n) { l.box = null; continue; }
+    sx /= n; sy /= n;
+    l.x = l.x === null ? sx : l.x + (sx - l.x) * 0.2; l.y = l.y === null ? sy : l.y + (sy - l.y) * 0.2; // names follow, a little behind
+    l.alpha += (l.want - l.alpha) * 0.08;
+    const px = l.x * k + ox, py = l.y * k + oy;
+    if (px < -60 || px > cw + 60 || py < -20 || py > ch + 20 || l.alpha < 0.03) { l.box = null; continue; }
+    const on = l === hoverLabel || (S.place && S.place.name === l.name);
+    const fs = clamp(11 + 9 * Math.sqrt(l.n / maxN), 11, 20);
+    ctx.font = `600 ${fs}px ${COL.serif}`;
+    const w = ctx.measureText(l.name).width;
+    const box = [px - w / 2 - 5, py - fs / 2 - 4, px + w / 2 + 5, py + fs / 2 + 4];
+    if (!on && placed.some(b => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) { l.box = null; continue; }
+    placed.push(box); l.box = l.want ? box : null;
+    ctx.globalAlpha = 0.88 * l.alpha; ctx.strokeStyle = COL.bg; ctx.lineWidth = 4.5; ctx.strokeText(l.name, px, py);
+    ctx.globalAlpha = l.alpha; ctx.fillStyle = COL.ink; ctx.fillText(l.name, px, py);
+    if (on) { ctx.fillRect(px - w / 2, py + fs / 2 + 1, w, 1.3); }
+    ctx.globalAlpha = 1;
+  }
+}
+function ring(i, r, lw, fill) {
+  const sx = X[i] * view.k + view.x, sy = Y[i] * view.k + view.y;
+  if (fill) { ctx.beginPath(); ctx.arc(sx, sy, Math.max(2.5, r - 3), 0, 6.2832); ctx.fillStyle = COL.fam[FAM[i]]; ctx.fill(); }
+  ctx.beginPath(); ctx.arc(sx, sy, r, 0, 6.2832);
+  ctx.lineWidth = lw + 2; ctx.strokeStyle = COL.bg; ctx.stroke();
+  ctx.lineWidth = lw; ctx.strokeStyle = COL.ink; ctx.stroke();
+}
+
+/* ---------- pointer: pan, zoom, hover, choose ---------- */
+function dotAt(px, py) {
+  const wx = (px - view.x) / view.k, wy = (py - view.y) / view.k, reach = Math.max(0.5, 7 / view.k);
+  let best = -1, bd = reach * reach;
+  for (let i = 0; i < N; i++) { if (!ALIVE[i] || !ST[i]) continue; const dx = X[i] - wx, dy = Y[i] - wy, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } }
+  return best;
+}
+function labelHit(px, py) { for (const l of LABELS) { const b = l.box; if (b && px >= b[0] && px <= b[2] && py >= b[1] && py <= b[3]) return l; } return null; }
+function zoomAt(px, py, factor) {
+  anim = null; follow = false;
+  const k = clamp(view.k * factor, 0.5, 80);
+  view.x = px - (px - view.x) * (k / view.k); view.y = py - (py - view.y) * (k / view.k); view.k = k;
+  labelAt = Math.min(labelAt, performance.now() - 1800); // new names soon after the zoom ends
+  if (!running) { relabel(); draw(); }
+}
+const pts = new Map(); let moved = 0, pinch = 0;
+const local = ev => { const r = cv.getBoundingClientRect(); return [ev.clientX - r.left, ev.clientY - r.top]; };
+function setHover(dot, lab, px, py) {
+  if (dot === hoverDot && lab === hoverLabel) { if (dot >= 0) placeTip(px, py); return; }
+  hoverDot = dot; hoverLabel = lab;
+  cv.classList.toggle('point', dot >= 0 || !!lab);
+  const tip = $('tip');
+  if (dot >= 0) {
+    const e = E[dot];
+    tip.innerHTML = `${e.who ? esc(e.who) + ': ' : ''}${esc(e.st)}<small>${fmtDate(e.d)} · ${esc(e.dom)}</small>`;
+    tip.hidden = false; placeTip(px, py);
+  } else tip.hidden = true;
+  if (!running) draw();
+}
+function placeTip(px, py) {
+  const tip = $('tip');
+  tip.style.left = clamp(px, 150, Math.max(150, cw - 150)) + 'px';
+  tip.style.top = (py < 90 ? py + 70 : py) + 'px';
+}
+cv.addEventListener('pointerdown', ev => {
+  try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
+  pts.set(ev.pointerId, local(ev)); moved = 0; anim = null;
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+});
+cv.addEventListener('pointermove', ev => {
+  const p = local(ev);
+  if (!pts.has(ev.pointerId)) {
+    if (ev.pointerType === 'mouse' && N) { const l = labelHit(p[0], p[1]); setHover(l ? -1 : dotAt(p[0], p[1]), l, p[0], p[1]); }
+    return;
+  }
+  const prev = pts.get(ev.pointerId); pts.set(ev.pointerId, p);
+  if (pts.size === 1) {
+    moved += Math.abs(p[0] - prev[0]) + Math.abs(p[1] - prev[1]);
+    if (moved > 5) { follow = false; track = false; cv.classList.add('drag'); setHover(-1, null); view.x += p[0] - prev[0]; view.y += p[1] - prev[1]; if (!running) draw(); }
+  } else if (pts.size === 2) {
+    const [a, b] = [...pts.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) zoomAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / pinch);
+    pinch = d; moved = 99;
+  }
+});
+function endPointer(ev) {
+  const had = pts.has(ev.pointerId), p = local(ev);
+  pts.delete(ev.pointerId); cv.classList.remove('drag'); pinch = 0;
+  if (!had || ev.type !== 'pointerup' || !N) return;
+  if (moved > 5) { if (!pts.size) { relabel(); if (!running) draw(); } return; }
+  if (pts.size) return;
+  const l = labelHit(p[0], p[1]);
+  if (l) { setPlace(l); return; }
+  const d = dotAt(p[0], p[1]);
+  if (d >= 0) { openEntry(E[d].id); return; }
+  if (S.place !== null || S.sel !== null) { stopAuto(); track = false; S.sel = null; REL = []; setPlace(null); }
+}
+cv.addEventListener('pointerup', endPointer);
+cv.addEventListener('pointercancel', endPointer);
+cv.addEventListener('pointerleave', () => { if (!pts.size) setHover(-1, null); });
+cv.addEventListener('wheel', ev => { ev.preventDefault(); const p = local(ev); zoomAt(p[0], p[1], Math.exp(-ev.deltaY * (ev.ctrlKey ? 0.012 : 0.0018))); }, { passive: false });
+cv.addEventListener('dblclick', ev => { const p = local(ev); zoomAt(p[0], p[1], 1.8); });
+$('zin').addEventListener('click', () => zoomAt(cw / 2, ch / 2, 1.5));
+$('zout').addEventListener('click', () => zoomAt(cw / 2, ch / 2, 1 / 1.5));
+$('zfit').addEventListener('click', () => { const f = frame(); if (f) flyTo(f); setTimeout(() => { follow = true; }, 500); });
+
+/* =====================================================================
+   Filters. The period decides which links are alive: only they move and
+   pull on each other, so the map of one season differs from the map of
+   the whole archive. Search and family only dim what does not match.
+   ===================================================================== */
+function passes(e) {
+  if (S.tags.size && !e.tags.some(t => S.tags.has(t))) return false;
+  if (S.fam && FAMILIES[FAM[e.i]].key !== S.fam) return false;
+  if (S.q) { const q = S.q.toLowerCase(); if (!e.hay.includes(q) && !(ftIds && ftIds.has(e.id))) return false; }
+  return true;
+}
+let WK_ACT = [], listVersion = 0;
+function applyFilters(keepPanel) {
+  WK_ACT = new Array(WEEKS.length).fill(0);
+  LIST = []; aliveN = 0;
+  const mask = S.place ? S.place.mask : null;
+  let born = 0;
+  for (const e of E) {
+    const i = e.i, ok = passes(e), inPlace = !mask || mask[i];
+    if (ok && inPlace) WK_ACT[e.w]++;
+    const alive = S.w0 === null || (e.w >= S.w0 && e.w <= S.w1);
+    if (alive && !ALIVE[i]) { // a link entering the period appears beside the neighbours already there
+      let sx = 0, sy = 0, n = 0;
+      for (let q = 0; q < KMAX; q++) { const j = NB[i * KMAX + q]; if (j < 0) break; if (ALIVE[j]) { sx += X[j]; sy += Y[j]; n++; } }
+      if (n) { X[i] = sx / n + ((i * 7919) % 13 - 6) * 0.15; Y[i] = sy / n + ((i * 104729) % 13 - 6) * 0.15; }
+      VX[i] = VY[i] = 0; born++;
+    }
+    if (alive !== !!ALIVE[i]) born++;
+    ALIVE[i] = alive ? 1 : 0;
+    if (alive) aliveN++;
+    ST[i] = !ok ? 0 : inPlace ? 2 : 1;
+    if (alive && ok && inPlace) LIST.push(e);
+  }
+  LIST.sort((a, b) => b.d - a.d); listVersion++;
+  if (hoverDot >= 0 && (!ST[hoverDot] || !ALIVE[hoverDot])) setHover(-1, null);
+  if (born) kick(0.8);
+  renderTime(); renderLegend();
+  if (!keepPanel) renderPanel();
+  syncDeck();
+  writeHash();
+  if (!running) { relabel(); draw(); }
+}
+function setTags(tags) {
+  if (tags.size === S.tags.size && [...tags].every(t => S.tags.has(t))) return;
+  S.tags = tags;
+  const current = BYID.get(S.sel);
+  const keep = current && ALIVE[current.i] && (!S.place || S.place.mask[current.i]) && passes(current);
+  if (!keep) { S.sel = null; REL = []; track = false; }
+  TRAIL = keep ? [current.i] : [];
+  READ = new Set(TRAIL); readVersion++; AUTO.t = 0;
+  const advance = !keep && (PRESENT || AUTO.on || !!current);
+  const panel = $('panel'), scroll = panel.scrollTop;
+  applyFilters(advance);
+  if (advance) {
+    autoNext();
+    if (S.sel === null) renderPanel();
+  }
+  panel.scrollTop = keep ? scroll : 0;
+}
+function toggleTag(t) {
+  const tags = new Set(S.tags);
+  if (tags.has(t)) tags.delete(t); else tags.add(t);
+  setTags(tags);
+}
+const tagPicker = $('tagPicker');
+let tagOpener = null;
+function tagsButton() {
+  return `<button type="button" class="pill" data-choose-tags aria-haspopup="dialog">${tagsButtonLabel()}</button>`;
+}
+function tagsButtonLabel() { return S.tags.size ? `Tags (${fmtN(S.tags.size)})` : 'Tags'; }
+function syncTagPicker() {
+  const q = $('tagSearch').value.trim().toLowerCase();
+  let visible = 0, selected = 0;
+  for (const row of $('tagOptions').children) {
+    row.hidden = !row.children[1].textContent.toLowerCase().includes(q) && !row.firstElementChild.value.toLowerCase().includes(q);
+    if (!row.hidden) visible++;
+    if (row.firstElementChild.checked) selected++;
+  }
+  $('tagEmpty').hidden = visible > 0;
+  $('tagCount').value = `${fmtN(selected)} selected`;
+  $('tagClear').disabled = selected === 0;
+}
+function chooseTags(button) {
+  if (!N) return;
+  tagOpener = button;
+  $('tagSearch').value = '';
+  const options = $('tagOptions');
+  options.innerHTML = Array.from(TAGN).sort((a, b) => Number(S.tags.has(b[0])) - Number(S.tags.has(a[0])) ||
+    b[1] - a[1] || label(a[0]).localeCompare(label(b[0]))).map(([t, n]) =>
+    `<label><input type="checkbox" value="${esc(t)}"${S.tags.has(t) ? ' checked' : ''}><span>${esc(label(t))}</span><small>${fmtN(n)}</small></label>`).join('');
+  syncTagPicker();
+  tagPicker.showModal();
+  options.scrollTop = 0;
+}
+$('tagSearch').addEventListener('input', () => { $('tagOptions').scrollTop = 0; syncTagPicker(); });
+$('tagOptions').addEventListener('change', syncTagPicker);
+$('tagClear').addEventListener('click', () => {
+  $('tagOptions').querySelectorAll(':checked').forEach(input => { input.checked = false; });
+  syncTagPicker();
+  $('tagSearch').focus();
+});
+function restoreTagFocus() {
+  if (!tagOpener) return;
+  const opener = tagOpener.isConnected ? tagOpener : $('panel').querySelector('[data-choose-tags]');
+  tagOpener = null;
+  opener?.focus({ preventScroll: true });
+}
+$('tagCancel').addEventListener('click', () => tagPicker.close());
+$('tagForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  setTags(new Set(Array.from($('tagOptions').querySelectorAll(':checked'), input => input.value)));
+  tagPicker.close();
+  restoreTagFocus();
+});
+tagPicker.addEventListener('close', restoreTagFocus);
+$('deckTags').addEventListener('click', ev => chooseTags(ev.currentTarget));
+function setPlace(l) {
+  if (l) {
+    const mask = new Uint8Array(N); for (let m = 0; m < l.mem.length; m++) mask[l.mem[m]] = 1;
+    S.place = { name: l.name, also: l.also, mem: l.mem, mask };
+    S.sel = null; REL = [];
+    const f = frame(l.mem); if (f) { f.k = Math.min(f.k, 30); flyTo(f); }
+  } else if (S.place) { S.place = null; const f = frame(); if (f) flyTo(f); setTimeout(() => { follow = true; }, 500); }
+  applyFilters();
+  $('panel').scrollTop = 0;
+}
+
+/* =====================================================================
+   Time strip (SVG). Newest week on the left, as in the Ledger. Drag to choose a period.
+   ===================================================================== */
+const tsvg = $('time'); let TW = 0;
+function renderTime() {
+  const W = tsvg.clientWidth || 600, H = tsvg.clientHeight || 58, n = WEEKS.length, base = H - 15;
+  TW = W / n;
+  const max = Math.max(1, ...WK_ACT); // bars are scaled to the current selection, so a small one still shows its shape
+  let h = '';
+  for (let w = 0; w < n; w++) {
+    const x = ((n - 1 - w) * TW + 0.5).toFixed(1), bw = Math.max(1, TW - 1).toFixed(1), ah = WK_ACT[w] / max * (base - 2);
+    const inside = S.w0 === null || (w >= S.w0 && w <= S.w1);
+    h += `<rect class="tot" x="${x}" y="2" width="${bw}" height="${base - 2}" opacity=".45"/>`;
+    if (ah > 0) h += `<rect class="${inside ? 'in' : 'act'}" x="${x}" y="${(base - ah).toFixed(1)}" width="${bw}" height="${ah.toFixed(1)}" ${inside ? '' : 'opacity=".45"'}/>`;
+  }
+  let lastX = -99, lastYear = 0;
+  for (let w = n - 1; w >= 0; w--) { // newest first, so labels run left to right
+    const d = WEEKS[w]; if (d.getDate() > 7) continue;
+    const x = (n - 1 - w) * TW; if (x - lastX < 62 || x > W - 30) continue;
+    h += `<text x="${x.toFixed(1)}" y="${H - 3}">${MONTHS[d.getMonth()]}${d.getFullYear() !== lastYear ? ' ' + d.getFullYear() : ''}</text>`;
+    lastX = x; lastYear = d.getFullYear();
+  }
+  if (S.w0 !== null) {
+    const x0 = (n - 1 - S.w1) * TW, x1 = (n - S.w0) * TW;
+    h += `<rect class="brush" x="${x0.toFixed(1)}" y="0" width="${(x1 - x0).toFixed(1)}" height="${base}"/>` +
+         `<line class="edge" x1="${x0.toFixed(1)}" x2="${x0.toFixed(1)}" y1="0" y2="${base}"/><line class="edge" x1="${x1.toFixed(1)}" x2="${x1.toFixed(1)}" y1="0" y2="${base}"/>`;
+  }
+  tsvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  tsvg.innerHTML = h;
+  $('period').innerHTML = S.w0 === null
+    ? `<strong>${fmtN(LIST.length)}</strong> links, all dates.<span class="hint2"> Drag across the bars to see the map of one period.</span>`
+    : `<strong>${fmtN(LIST.length)}</strong> links, ${periodLabel()}`;
+  $('clearTime').hidden = S.w0 === null;
+}
+function periodLabel() {
+  const a = WEEKS[S.w0], b = new Date(WEEKS[S.w1]); b.setDate(b.getDate() + 6);
+  return `${fmtDate(a)} to ${fmtDate(b)}`;
+}
+let brushFrom = null;
+const weekAt = ev => { const r = tsvg.getBoundingClientRect(); return WEEKS.length - 1 - clamp(Math.floor((ev.clientX - r.left) / (r.width / WEEKS.length)), 0, WEEKS.length - 1); };
+tsvg.addEventListener('pointerdown', ev => {
+  if (!WEEKS.length) return;
+  stopPlay(); try { tsvg.setPointerCapture(ev.pointerId); } catch (e) {}
+  brushFrom = weekAt(ev); tsvg._moved = false;
+});
+tsvg.addEventListener('pointermove', ev => {
+  if (brushFrom === null) return;
+  const w = weekAt(ev);
+  if (w !== brushFrom) tsvg._moved = true;
+  if (!tsvg._moved) return;
+  S.w0 = Math.min(brushFrom, w); S.w1 = Math.max(brushFrom, w);
+  applyFilters(true); schedulePanel();
+});
+tsvg.addEventListener('pointerup', () => {
+  if (brushFrom === null) return;
+  if (!tsvg._moved) { // a plain click: clear a period, or choose the month around the click
+    if (S.w0 !== null) S.w0 = S.w1 = null;
+    else { S.w0 = clamp(brushFrom - 2, 0, WEEKS.length - 1); S.w1 = clamp(brushFrom + 2, 0, WEEKS.length - 1); }
+  }
+  brushFrom = null; follow = true; applyFilters();
+});
+tsvg.addEventListener('pointercancel', () => { brushFrom = null; });
+$('clearTime').addEventListener('click', () => { stopPlay(); S.w0 = S.w1 = null; follow = true; applyFilters(); });
+let panelT = 0;
+function schedulePanel() { clearTimeout(panelT); panelT = setTimeout(renderPanel, 120); }
+
+// Grow: start from the first weeks and let the archive arrive week by week.
+let playT = 0;
+function stopPlay() { if (!playT) return; clearInterval(playT); playT = 0; $('play').setAttribute('aria-pressed', 'false'); $('play').textContent = 'Grow from the start'; }
+$('play').addEventListener('click', () => {
+  if (playT) { stopPlay(); return; }
+  S.sel = null; REL = []; S.place = null;
+  const n = WEEKS.length;
+  S.w0 = 0; S.w1 = Math.min(n - 1, 3); follow = true;
+  applyFilters();
+  $('play').setAttribute('aria-pressed', 'true'); $('play').textContent = 'Pause';
+  playT = setInterval(() => {
+    if (S.w1 >= n - 1) { stopPlay(); S.w0 = S.w1 = null; applyFilters(); return; }
+    S.w1++; applyFilters(true); schedulePanel();
+  }, 420);
+});
+
+function renderLegend() {
+  $('legend').innerHTML = FAMILIES.filter(f => !LEGEND_SKIP.has(f.key)).map(f =>
+    `<button type="button" data-fam="${f.key}" aria-pressed="${S.fam === f.key}"><i style="background:var(--${f.key})"></i>${esc(f.name)}</button>`).join('') +
+    `<span class="age">older links are fainter</span>`;
+}
+$('legend').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  S.fam = S.fam === b.dataset.fam ? '' : b.dataset.fam; applyFilters();
+});
+
+/* =====================================================================
+   Panel: what has gathered in view, a list of links, or the reader
+   ===================================================================== */
+const CHUNK = 150; let shownRows = CHUNK, panelBusy = false;
+function chipsHTML() {
+  const c = [];
+  if (S.place) c.push(`<button class="chip" data-clear="place">${esc(S.place.name)}<span class="x" aria-hidden="true">×</span></button>`);
+  for (const t of S.tags) c.push(`<button type="button" class="chip" data-tag="${esc(t)}" aria-label="Remove ${esc(label(t))}"><i style="background:var(--${TAG_FAMILY[t] || 'other'})"></i>${esc(label(t))}<span class="x" aria-hidden="true">×</span></button>`);
+  if (S.q) c.push(`<button class="chip" data-clear="q">“${esc(S.q)}”<span class="x" aria-hidden="true">×</span></button>`);
+  if (S.fam) c.push(`<button class="chip" data-clear="fam"><i style="background:var(--${S.fam})"></i>${esc(FAMILIES.find(f => f.key === S.fam).name)}<span class="x" aria-hidden="true">×</span></button>`);
+  if (S.w0 !== null) c.push(`<button class="chip" data-clear="time">${esc(periodLabel())}<span class="x" aria-hidden="true">×</span></button>`);
+  return c.length ? `<div class="chips">${c.join('')}</div>` : '';
+}
+function rowsHTML(list) {
+  return list.map(e =>
+    `<li><button type="button" data-id="${e.id}" class="${SEEN.has(e.link) ? 'seen' : ''}"><span class="d">${fmtShort(e.d)}</span>` +
+    `<span class="t">${e.who ? `<b>${esc(e.who)}</b>` : ''}${esc(e.full)}</span><span class="m">${esc(e.dom)}</span></button></li>`).join('');
+}
+function renderPanel() {
+  clearTimeout(panelT);
+  const p = $('panel');
+  if (S.sel !== null) { renderReader(p); return; }
+  if (PRESENT && !LIST.length) {
+    p.innerHTML = '<h2>No matching links</h2><p class="body">Change the tags or exit the presentation to edit other filters.</p>';
+    return;
+  }
+  if (!S.place && !S.q && !S.tags.size) { renderOverview(p); return; }
+  shownRows = CHUNK;
+  let h = `<button class="back" type="button" data-clear="all">← Whole map</button>`;
+  if (S.place) h += `<h2>${esc(S.place.name)}</h2>` + (S.place.also.length ? `<p class="terms">Also: ${S.place.also.map(esc).join(', ')}</p>` : '') +
+    `<p class="lead">The links that were gathered here when you chose it. The map keeps moving; this list stays as it was.</p>`;
+  else if (S.tags.size) h += `<h2>${S.tags.size === 1 ? esc(label([...S.tags][0])) : 'Selected tags'}</h2>`;
+  else h += `<h2>Search</h2>`;
+  h += chipsHTML();
+  h += `<div class="transport"><button type="button" class="pill" data-autotoggle aria-pressed="${AUTO.on}" title="Open these links one after another, newest first">${AUTO.on ? '❚❚ Pause' : '▶ Read along'}</button>` +
+       `<button type="button" class="pill" data-present title="Show these links as slides, newest first">Present as slides</button>${tagsButton()}</div>`;
+  h += `<p class="kicker" style="margin-bottom:6px"><span>${fmtN(LIST.length)} ${LIST.length === 1 ? 'link' : 'links'}, newest first</span></p>`;
+  h += LIST.length ? `<ul class="rows" id="rows">${rowsHTML(LIST.slice(0, shownRows))}</ul>` : `<p class="note">Nothing here matches. Remove a filter above.</p>`;
+  if (LIST.length > shownRows) h += `<button class="pill more" type="button" id="more">Show more</button>`;
+  p.innerHTML = h;
+}
+function renderOverview(p) {
+  const live = LABELS.filter(l => l.want).sort((a, b) => b.n - a.n);
+  const keep = p.scrollTop;
+  p.innerHTML =
+    `<h2>${fmtN(aliveN)} links${S.w0 !== null ? ' in this period' : ''}</h2>` +
+    `<p class="lead">Each dot is a saved link, held near the links whose words it shares. Nothing is fixed in place. The names are read off whatever has gathered in each part of the view, so they change as you zoom in and as the map shifts.</p>` +
+    chipsHTML() +
+    `<div class="transport">${tagsButton()}</div>` +
+    `<h3>Gathered in view now</h3>` +
+    `<p class="kicker" style="margin-bottom:4px"><span>Names read off the map</span><span style="margin-left:auto">links</span></p>` +
+    (live.length ? `<ul class="topics">` + live.map((l, q) =>
+      `<li><button type="button" data-label="${q}"><span class="nm">${esc(l.name)}<small>${esc(l.also.join(', '))}</small></span><span class="n">${fmtN(l.n)}</span></button></li>`).join('') + `</ul>`
+      : `<p class="note">${nbDone < N ? 'Links are still finding their neighbours…' : 'Nothing has gathered here yet.'}</p>`) +
+    `<h3>How it moves</h3><p class="note"><b>Reach</b> is how many of its closest links each link holds on to: few gives threads and small knots, many gives broad masses. <b>Pull</b> is how hard it holds. While the map is <b>drifting</b> both wander slowly, so it keeps regrouping; move either slider, or press the button, to hold it still.</p>` +
+    `<h3>Keys</h3><dl class="keys"><dt><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd></dt><dd>Follow a path from link to link</dd><dt><kbd>n</kbd> <kbd>b</kbd></dt><dd>Next link, and back</dd><dt><kbd>Space</kbd></dt><dd>Read along, and pause</dd><dt><kbd>/</kbd></dt><dd>Search</dd><dt><kbd>→</kbd> <kbd>←</kbd></dt><dd>When presenting: next and previous slide (a clicker works too)</dd><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Next and previous link in a list</dd>` +
+    `<dt><kbd>o</kbd></dt><dd>Open the article</dd><dt><kbd>Esc</kbd></dt><dd>Step back</dd></dl>` +
+    `<p class="foot">Links saved to Pinboard by David Jhave Johnston, passed through IFTTT and Google Sheets into a SQLite archive. Postdoctoral research, Center for Digital Narrative, University of Bergen. The map is computed in your browser from titles and summaries. <a href="https://glia.ca/">glia.ca</a></p>`;
+  p._live = live; p.scrollTop = keep;
+}
+
+function related(e, k) {
+  const acc = new Float32Array(N);
+  for (const [w, wt] of e.vec) { const p = POST.get(w); if (!p) continue; for (let j = 0; j < p.length; j += 2) acc[p[j]] += wt * p[j + 1]; }
+  const tagSet = new Set(e.tags), cand = [];
+  for (let i = 0; i < N; i++) {
+    if (acc[i] < 0.06 || i === e.i) continue;
+    const o = E[i]; if (o.link === e.link || o.title === e.title) continue;
+    let shared = 0; for (const t of o.tags) if (tagSet.has(t)) shared++;
+    const union = tagSet.size + o.tags.length - shared;
+    cand.push([i, acc[i] + (union ? 0.08 * shared / union : 0)]);
+  }
+  cand.sort((a, b) => b[1] - a[1]);
+  return cand.slice(0, k).map(([i]) => E[i]);
+}
+const textCache = new Map();
+function paragraphs(text) {
+  const ps = text.split(/\n\s*\n|\n~\n/).map(s => s.replace(/\s*\n\s*/g, ' ').trim()).filter(s => s && s !== '~');
+  return ps.map((p, k) => `<p class="${k === 0 ? 'lede' : ''}${p.length < 70 ? ' short' : ''}">${esc(p)}</p>`).join('');
+}
+async function loadText(e) {
+  let text = textCache.get(e.id);
+  if (text === undefined) {
+    try { const r = await fetch(`atlas.php?id=${e.id}`); if (!r.ok) throw new Error(r.status); text = (await r.json()).text || ''; }
+    catch (err) { text = null; }
+    textCache.set(e.id, text);
+  }
+  if (S.sel !== e.id) return;
+  const body = $('rbody'); if (!body) return;
+  if (text === null) { body.insertAdjacentHTML('beforeend', '<p class="note">The full text could not be loaded. Open the article instead.</p>'); return; }
+  if (!text) return;
+  body.innerHTML = paragraphs(text);
+  if (text.length > 2600) { body.classList.add('clip'); body.insertAdjacentHTML('afterend', '<button class="linkbtn" id="morebtn" type="button">Show the full saved text</button>'); }
+}
+let PATHS_OPEN = false;
+try { PATHS_OPEN = localStorage.getItem('atlasPathsOpen') === '1'; } catch (e) {}
+function renderReader(p) {
+  const e = BYID.get(S.sel);
+  const backTo = S.place ? esc(S.place.name) : S.tags.size ? 'selected tags' : S.q ? 'search results' : 'the whole map';
+  const pos = LIST.findIndex(o => o.id === e.id);
+  const head = PRESENT && e.who ? e.st : e.full; // on a slide, a post from X is headed by its first sentence; the whole post follows
+  p.innerHTML =
+    `<div class="transport"><button type="button" class="pill step" data-prev aria-label="Previous link" title="Back to the previous link (b)">‹</button>` +
+      `<button type="button" class="pill" data-autotoggle aria-pressed="${AUTO.on}" title="Open links one after another. Space starts and pauses.">${AUTO.on ? '❚❚ Pause' : '▶ Read along'}</button>` +
+      `<button type="button" class="pill step" data-next aria-label="Next link" title="On to the next link (n)">›</button>` +
+      tagsButton() +
+      (pos >= 0 ? `<span class="count">${fmtN(pos + 1)} of ${fmtN(LIST.length)}, newest first</span>` : '') + `</div>` +
+    `<p class="kicker meta"><span>${fmtDate(e.d)}</span><span>${esc(e.dom)}</span>` +
+      e.tags.map(g => `<button type="button" class="chip" data-tag="${esc(g)}" aria-pressed="${S.tags.has(g)}" title="Toggle ${esc(label(g))} in the tag filter"><i style="background:var(--${TAG_FAMILY[g] || 'other'})"></i>${esc(label(g))}</button>`).join('') + `</p>` +
+    `<h2 class="${head.length > 110 ? 'long' : ''}">${e.who ? esc(e.who) + ': ' : ''}${esc(head)}</h2>` +
+    `<div class="actions"><a class="open" href="${esc(safeHref(e.link))}" target="_blank" rel="noopener noreferrer" data-visit>Open the article</a>` +
+      `<button type="button" class="fold2" data-pathtoggle aria-expanded="${PATHS_OPEN}">Ways on from here <span aria-hidden="true">${PATHS_OPEN ? '▲' : '▼'}</span></button>` +
+      `<button class="back" type="button" data-close>Back to ${backTo} ×</button></div>` +
+    `<div id="pathbox"${PATHS_OPEN ? '' : ' hidden'}><div class="paths" id="paths"></div>` +
+    `<p class="pathnote"><span>The arrow keys follow these.</span><span>${READ.size} read</span>${READ.size > 1 ? `<button class="linkbtn" type="button" data-trailclear>Forget what has been read</button>` : ''}</p></div>` +
+    `<div class="body" id="rbody">${e.summary ? `<p class="lede">${esc(e.summary)}</p>` : ''}</div>` +
+    (REL.length ? `<div class="relblock"><h3>Closest links</h3><ul class="rows">${REL.map(o =>
+      `<li><button type="button" data-id="${o.id}"><span class="d">${fmtShort(o.d)}</span><span class="t">${o.who ? `<b>${esc(o.who)}</b>` : ''}${esc(o.full)}</span>` +
+      `<span class="m">${esc(o.dom)}</span></button></li>`).join('')}</ul></div>` : '');
+  p.scrollTop = 0;
+  pathKey = ''; syncPaths();
+  loadText(e);
+}
+
+/* =====================================================================
+   Paths. From the open link, each arrow key leads to one of the links it
+   is tied to: the one lying most nearly in that direction on the map.
+   Links already on the path are avoided, so repeated presses travel on
+   instead of bouncing back. Where no tied link lies that way, the arrow
+   takes the nearest link in that direction instead (shown dashed).
+   ===================================================================== */
+const DIRS = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
+const ARROW = { left: '←', right: '→', up: '↑', down: '↓' };
+// the newest links in the current selection that have not been read (kept until something changes)
+let leapKey = '', leapList = [];
+function newestUnread() {
+  const key = readVersion + ':' + listVersion;
+  if (key !== leapKey) {
+    leapKey = key; leapList = [];
+    for (const e of LIST) { if (!READ.has(e.i)) { leapList.push(e.i); if (leapList.length === 6) break; } }
+  }
+  return leapList;
+}
+function pathTargets(i) {
+  const cand = [], base = i * KMAX;
+  for (let q = 0; q < KMAX; q++) {
+    const j = NB[base + q]; if (j < 0) break; if (!ALIVE[j] || ST[j] !== 2 || READ.has(j)) continue;
+    const dx = X[j] - X[i], dy = Y[j] - Y[i], d = Math.hypot(dx, dy) || 1e-6;
+    cand.push({ j, ux: dx / d, uy: dy / d, w: NW[base + q], linked: true });
+  }
+  const out = {}, used = new Set([i]);
+  // first the tied, unread links that lie in each arrow's direction; then any left over, to arrows still free
+  for (const floor of [0.38, -0.3]) {
+    const opts = [];
+    for (const name in DIRS) { if (out[name]) continue; for (const c of cand) {
+      if (used.has(c.j)) continue;
+      const cos = c.ux * DIRS[name][0] + c.uy * DIRS[name][1];
+      if (cos >= floor) opts.push([cos * (0.6 + 0.4 * c.w), name, c]);
+    } }
+    opts.sort((a, b) => b[0] - a[0]);
+    for (const [, name, c] of opts) { if (out[name] || used.has(c.j)) continue; out[name] = c; used.add(c.j); }
+  }
+  // an arrow with no tied link left to read leaps to the newest unread link in the selection,
+  // so the keys never run out until everything in the selection has been read
+  const fresh = newestUnread(); let f = 0;
+  for (const name in DIRS) {
+    if (out[name]) continue;
+    while (f < fresh.length && used.has(fresh[f])) f++;
+    if (f < fresh.length) { out[name] = { j: fresh[f], linked: false }; used.add(fresh[f]); }
+  }
+  return out;
+}
+function move(name) {
+  if (!N) return;
+  if (S.sel === null) { // nothing open yet: begin at the link nearest the middle of the view
+    const wx = (cw / 2 - view.x) / view.k, wy = (ch / 2 - view.y) / view.k; let best = -1, bd = Infinity;
+    for (let i = 0; i < N; i++) { if (!ALIVE[i] || ST[i] !== 2) continue; const d = (X[i] - wx) ** 2 + (Y[i] - wy) ** 2; if (d < bd) { bd = d; best = i; } }
+    if (best >= 0) openEntry(E[best].id, false, AUTO.on ? 'auto' : 'path');
+    return;
+  }
+  const t = pathTargets(BYID.get(S.sel).i)[name];
+  if (t) { openEntry(E[t.j].id, false, AUTO.on ? 'auto' : 'path'); AUTO.t = 0; } // an arrow steers read-along without stopping it
+}
+function stepBack() {
+  if (TRAIL.length < 2) return;
+  TRAIL.pop(); const i = TRAIL.pop();
+  openEntry(E[i].id, false, AUTO.on ? 'auto' : 'path'); AUTO.t = 0;
+}
+let pathKey = '';
+function syncPaths() { // the four buttons in the reader mirror the arrows on the map, which shift as the map moves
+  const box = $('paths'); if (!box || S.sel === null || !PATHS_OPEN) return;
+  const ways = pathTargets(BYID.get(S.sel).i);
+  const key = ['up', 'left', 'right', 'down'].map(n => ways[n] ? ways[n].j + (ways[n].linked ? 'l' : 'n') : '-').join(',');
+  if (key === pathKey) return; pathKey = key;
+  box.innerHTML = ['up', 'left', 'right', 'down'].map(n => {
+    const t = ways[n]; if (!t) return `<button type="button" disabled><kbd>${ARROW[n]}</kbd><span>Nothing this way</span></button>`;
+    const o = E[t.j];
+    return `<button type="button" data-move="${n}" class="${t.linked ? '' : 'near'}" title="${t.linked ? 'Shares words with this link' : 'No tied link left to read this way: the newest unread link'}"><kbd>${ARROW[n]}</kbd><span>${t.linked ? '' : 'Newest unread: '}${o.who ? esc(o.who) + ': ' : ''}${esc(o.full)}</span></button>`;
+  }).join('');
+}
+
+/* =====================================================================
+   Read along: links open one after another. "By theme" follows the ties
+   from the open link to one not yet read, favouring recent links, and
+   when a thread runs out starts again from the newest unread link.
+   "By date" simply goes from newest to oldest. Both keep to the current
+   tags, search, family, period and place.
+   ===================================================================== */
+function autoNext() {
+  AUTO.t = 0;
+  const cur = S.sel !== null ? BYID.get(S.sel) : null;
+  const ok = e => ALIVE[e.i] && ST[e.i] === 2 && !READ.has(e.i);
+  let next = null;
+  if (cur && AUTO.mode === 'theme') {
+    let bs = -1; const base = cur.i * KMAX, span = Math.max(1, WEEKS.length - 1);
+    for (let q = 0; q < KMAX; q++) {
+      const j = NB[base + q]; if (j < 0) break; const o = E[j]; if (!ok(o)) continue;
+      const s = NW[base + q] + 0.7 * o.w / span;
+      if (s > bs) { bs = s; next = o; }
+    }
+  }
+  if (!next) next = LIST.find(ok);
+  if (!next) { stopAuto(); return; }
+  openEntry(next.id, false, 'auto');
+}
+function startAuto() {
+  AUTO.on = true; AUTO.t = 0;
+  if (S.sel !== null) track = true; else autoNext();
+  syncAuto(); startLoop();
+}
+function stopAuto() { if (!AUTO.on) return; AUTO.on = false; syncAuto(); }
+function syncAuto() {
+  syncDeck();
+  for (const b of [$('auto'), $('dauto'), document.querySelector('[data-autotoggle]')]) if (b) { b.setAttribute('aria-pressed', AUTO.on); b.textContent = AUTO.on ? '❚❚ Pause' : '▶ Read along'; }
+  document.querySelectorAll('[data-auto]').forEach(b => b.setAttribute('aria-pressed', b.dataset.auto === AUTO.mode));
+}
+$('auto').addEventListener('click', () => { if (AUTO.on) stopAuto(); else startAuto(); });
+// choosing an order moves on at once in that order, so the choice is seen to do something
+document.querySelectorAll('[data-auto]').forEach(b => b.addEventListener('click', () => { AUTO.mode = b.dataset.auto; syncAuto(); autoNext(); }));
+$('next').addEventListener('click', autoNext);
+$('prev').addEventListener('click', stepBack);
+
+/* =====================================================================
+   Presenting. The current selection (tags, a search, a place, a
+   period, or everything) is shown one link at a time as large slides,
+   newest first, with the map as a side rail showing where each one sits.
+   Right arrow, Page Down or a clicker moves on; left goes back; Space
+   lets it advance by itself; Esc leaves. "By date" walks back in time;
+   "by theme" follows ties within the selection. Starting a presentation
+   forgets what was read before, so it always begins from the newest.
+   ===================================================================== */
+function present(on, reset = false) {
+  if (!!on === PRESENT && !reset) return;
+  PRESENT = !!on; document.body.classList.toggle('present', PRESENT);
+  if (PRESENT) {
+    stopPlay();
+    AUTO.mode = 'date'; // a presentation starts newest first; "by theme" is one press away
+    READ = new Set(); TRAIL = []; readVersion++;
+    if (S.sel !== null && LIST.some(e => e.id === S.sel)) {
+      const i = BYID.get(S.sel).i; READ.add(i); TRAIL = [i]; track = true;
+    } else {
+      S.sel = null; REL = []; track = false; autoNext();
+    }
+  } else {
+    stopAuto();
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  }
+  renderPanel(); syncAuto(); writeHash();
+  setTimeout(() => { resize(); follow = !track; startLoop(); }, 60);
+}
+function syncDeck() {
+  if (!PRESENT) return;
+  const bits = S.tags.size ? [[...S.tags].map(label).join(', ')] : [];
+  if (S.place) bits.push(S.place.name); if (S.q) bits.push('“' + S.q + '”');
+  if (S.fam) bits.push(FAMILIES.find(f => f.key === S.fam).name); if (S.w0 !== null) bits.push(periodLabel());
+  const subject = bits.length ? bits.join(' · ') : 'All links';
+  $('deckSubject').textContent = $('deckSubject').title = subject;
+  $('deckTags').textContent = tagsButtonLabel();
+  const pos = S.sel !== null ? LIST.findIndex(o => o.id === S.sel) : -1;
+  $('deckCount').textContent = AUTO.mode === 'date' && pos >= 0 ? `${fmtN(pos + 1)} / ${fmtN(LIST.length)}` : `${fmtN(TRAIL.length)} shown of ${fmtN(LIST.length)}`;
+}
+function toggleFull() {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+}
+$('presentBtn').addEventListener('click', () => present(true));
+$('dexit').addEventListener('click', () => present(false));
+$('dfull').addEventListener('click', toggleFull);
+$('dnext').addEventListener('click', autoNext);
+$('dprev').addEventListener('click', stepBack);
+$('dauto').addEventListener('click', () => { if (AUTO.on) stopAuto(); else startAuto(); });
+
+// how: 'path' (arrow keys and path buttons) and 'auto' (read along) keep the open link centred
+function openEntry(id, quiet, how) {
+  const e = BYID.get(id); if (!e) return;
+  stopPlay();
+  if (how !== 'auto') stopAuto();
+  S.sel = id; REL = related(e, 8);
+  if (!READ.has(e.i)) { READ.add(e.i); readVersion++; }
+  if (TRAIL[TRAIL.length - 1] !== e.i) { TRAIL.push(e.i); if (TRAIL.length > 80) TRAIL.shift(); }
+  if (!ALIVE[e.i]) S.w0 = S.w1 = null;
+  if (!passes(e)) S.fam = '';
+  applyFilters();
+  if (how) {
+    const was = track; track = true;
+    // Stay wide enough to see where this link sits among its neighbourhoods; keep whatever zoom the reader has chosen.
+    const f = frame(), kk = (was || !follow || !f) ? view.k : f.k * 1.45;
+    flyTo({ k: kk, x: cw / 2 - X[e.i] * kk, y: ch / 2 - Y[e.i] * kk });
+  } else if (!quiet) reveal(e.i);
+  startLoop();
+  syncDeck();
+  if (innerWidth <= 900 && how !== 'auto' && !PRESENT) $('panel').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+}
+function closeEntry() { stopAuto(); track = false; S.sel = null; REL = []; applyFilters(); }
+function markSeen(e) {
+  if (!e || SEEN.has(e.link)) return;
+  SEEN.add(e.link);
+  try { localStorage.setItem('visitedLinks', JSON.stringify(Array.from(SEEN))); } catch (err) {}
+}
+function clearFilter(what) {
+  const hadPlace = !!S.place;
+  if (what === 'place' || what === 'all') S.place = null;
+  if (what === 'all') S.tags.clear();
+  if (what === 'q' || what === 'all') { S.q = ''; $('q').value = ''; ftIds = null; }
+  if (what === 'fam' || what === 'all') S.fam = '';
+  if (what === 'time' || what === 'all') { stopPlay(); S.w0 = S.w1 = null; }
+  applyFilters();
+  if (hadPlace && !S.place || what === 'all') { const f = frame(); if (f) flyTo(f); setTimeout(() => { follow = true; }, 500); }
+}
+$('panel').addEventListener('click', ev => {
+  const b = ev.target.closest('button, a'); if (!b) return;
+  if (b.id === 'morebtn') { $('rbody').classList.remove('clip'); b.remove(); }
+  else if (b.id === 'more') { shownRows += CHUNK; $('rows').innerHTML = rowsHTML(LIST.slice(0, shownRows)); if (LIST.length <= shownRows) b.remove(); }
+  else if (b.dataset.close !== undefined) closeEntry();
+  else if (b.dataset.move) move(b.dataset.move);
+  else if (b.dataset.chooseTags !== undefined) chooseTags(b);
+  else if (b.dataset.tag) {
+    toggleTag(b.dataset.tag);
+    const target = [...$('panel').querySelectorAll('[data-tag]')].find(chip => chip.dataset.tag === b.dataset.tag);
+    (target || (PRESENT ? $('deckTags') : $('panel').querySelector('[data-choose-tags]')))?.focus({ preventScroll: true });
+  }
+  else if (b.dataset.present !== undefined) present(true);
+  else if (b.dataset.prev !== undefined) stepBack();
+  else if (b.dataset.next !== undefined) autoNext();
+  else if (b.dataset.autotoggle !== undefined) { if (AUTO.on) stopAuto(); else startAuto(); }
+  else if (b.dataset.pathtoggle !== undefined) { PATHS_OPEN = !PATHS_OPEN; try { localStorage.setItem('atlasPathsOpen', PATHS_OPEN ? '1' : '0'); } catch (e) {} renderPanel(); }
+  else if (b.dataset.back !== undefined) stepBack();
+  else if (b.dataset.trailclear !== undefined) { TRAIL = S.sel !== null ? [BYID.get(S.sel).i] : []; READ = new Set(TRAIL); readVersion++; renderPanel(); if (!running) draw(); }
+  else if (b.dataset.visit !== undefined) markSeen(BYID.get(S.sel));
+  else if (b.dataset.clear) clearFilter(b.dataset.clear);
+  else if (b.dataset.label !== undefined) { const l = ($('panel')._live || [])[+b.dataset.label]; if (l) setPlace(l); }
+  else if (b.dataset.id) openEntry(+b.dataset.id);
+});
+// pointing at a row or a name in the panel marks it on the map; the list of names holds still while the pointer is over it
+$('panel').addEventListener('pointerover', ev => {
+  if (ev.pointerType !== 'mouse') return;
+  panelBusy = true;
+  const b = ev.target.closest('button[data-id], button[data-label]');
+  let d = -1, l = null;
+  if (b && b.dataset.id) { const e = BYID.get(+b.dataset.id); if (e) d = e.i; } else if (b) l = ($('panel')._live || [])[+b.dataset.label] || null;
+  if (d !== hoverDot || l !== hoverLabel) { hoverDot = d; hoverLabel = l; $('tip').hidden = true; if (!running) draw(); }
+});
+$('panel').addEventListener('pointerleave', () => { panelBusy = false; if (hoverDot >= 0 || hoverLabel) { hoverDot = -1; hoverLabel = null; if (!running) draw(); } });
+
+/* =====================================================================
+   The reading pane can be made wider or narrower by dragging its edge.
+   ===================================================================== */
+(function () {
+  const grip = $('grip'), main = grip.parentElement;
+  const setW = (w, save) => {
+    const total = main.getBoundingClientRect().width;
+    w = clamp(w, 280, Math.max(280, total - 340));
+    main.style.setProperty('--panel-w', Math.round(w) + 'px');
+    if (save) try { localStorage.setItem('atlasPanelW', Math.round(w)); } catch (e) {}
+  };
+  try { const w = +localStorage.getItem('atlasPanelW'); if (w) setW(w); } catch (e) {}
+  let dragging = false;
+  grip.addEventListener('pointerdown', ev => { dragging = true; grip.classList.add('on'); try { grip.setPointerCapture(ev.pointerId); } catch (e) {} ev.preventDefault(); });
+  grip.addEventListener('pointermove', ev => { if (dragging) setW(main.getBoundingClientRect().right - ev.clientX, true); });
+  const end = () => { dragging = false; grip.classList.remove('on'); };
+  grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+  grip.addEventListener('dblclick', () => { main.style.removeProperty('--panel-w'); try { localStorage.removeItem('atlasPanelW'); } catch (e) {} });
+  grip.addEventListener('keydown', ev => {
+    if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+    ev.preventDefault(); ev.stopPropagation(); // these arrows size the pane; they do not follow a path
+    setW($('panel').getBoundingClientRect().width + (ev.key === 'ArrowLeft' ? 32 : -32), true);
+  });
+  addEventListener('resize', () => { const w = parseFloat(main.style.getPropertyValue('--panel-w')); if (w) setW(w); });
+})();
+
+/* =====================================================================
+   Search, theme, keys, address
+   ===================================================================== */
+let qTimer = 0, qSeq = 0;
+function setQuery(v) {
+  S.q = v.trim(); ftIds = null; S.sel = null; REL = [];
+  applyFilters();
+  clearTimeout(qTimer);
+  const mine = ++qSeq;
+  const query = S.q;
+  if (query.length < 3) return;
+  qTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(`atlas.php?q=${encodeURIComponent(query)}`); if (!r.ok) return;
+      const j = await r.json(); if (mine !== qSeq || query !== S.q) return;
+      ftIds = new Set(j.ids || []); applyFilters(S.sel !== null);
+      if (PRESENT && S.sel === null && LIST.length) autoNext();
+    } catch (err) { /* title and summary search still works */ }
+  }, 350);
+}
+$('q').addEventListener('input', ev => { const v = ev.target.value; clearTimeout(setQuery.t); setQuery.t = setTimeout(() => setQuery(v), 160); });
+
+const SUN = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="10" cy="10" r="3.6"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 1.8v2M10 16.2v2M1.8 10h2M16.2 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M4.2 15.8l1.4-1.4M14.4 5.6l1.4-1.4"/></g></svg>';
+const MOON = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M16.8 12.9A7 7 0 0 1 7.1 3.2a7.2 7.2 0 1 0 9.7 9.7z"/></svg>';
+function syncTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark', b = $('theme');
+  b.innerHTML = (dark ? SUN : MOON) + `<span style="margin-left:6px">${dark ? 'Light' : 'Dark'}</span>`;
+  b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+  readColours(); requestDraw();
+}
+$('theme').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('theme', next); } catch (e) {}
+  syncTheme();
+});
+
+document.addEventListener('keydown', ev => {
+  if (tagPicker.open) return;
+  const inField = ev.target.matches('input, textarea, select');
+  if (ev.key === '/' && !inField) { ev.preventDefault(); $('q').focus(); $('q').select(); return; }
+  if (ev.key === 'Escape') {
+    if (inField) { ev.target.blur(); return; }
+    if (PRESENT) { present(false); return; }
+    if (S.sel !== null) closeEntry();
+    else if (S.place) clearFilter('place');
+    else clearFilter('all');
+    return;
+  }
+  if (inField || ev.metaKey || ev.ctrlKey || ev.altKey || !N) return;
+  if (PRESENT) { // slides: right and left (or a clicker's Page Down and Page Up) move on and back; up and down scroll the slide
+    if (ev.key === 'ArrowRight' || ev.key === 'PageDown') { ev.preventDefault(); autoNext(); return; }
+    if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') { ev.preventDefault(); stepBack(); return; }
+    if (ev.key === 'f') { ev.preventDefault(); toggleFull(); return; }
+    if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') return;
+  }
+  const arrow = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' }[ev.key];
+  if (arrow && !ev.shiftKey) { ev.preventDefault(); move(arrow); return; }
+  if (ev.key === ' ' && !ev.target.closest('button, a')) { ev.preventDefault(); if (AUTO.on) stopAuto(); else startAuto(); return; }
+  if (ev.key === 'b') { ev.preventDefault(); stepBack(); return; }
+  if (ev.key === 'n') { ev.preventDefault(); autoNext(); return; }
+  if (['j', 'k', 'o'].includes(ev.key)) ev.preventDefault();
+  if (ev.key === 'j' || ev.key === 'k') {
+    if (!LIST.length) return;
+    let n = LIST.findIndex(e => e.id === S.sel);
+    n = n < 0 ? 0 : clamp(n + (ev.key === 'j' ? 1 : -1), 0, LIST.length - 1);
+    openEntry(LIST[n].id);
+  } else if (ev.key === 'o' && S.sel !== null) {
+    const e = BYID.get(S.sel); markSeen(e); window.open(safeHref(e.link), '_blank', 'noopener');
+  }
+});
+
+// The address keeps tags, search, period, family and the open link, in the same form as the
+// Ledger view, so the links to the other views carry the current selection across.
+function writeHash() {
+  const p = new URLSearchParams();
+  if (S.q) p.set('q', S.q);
+  if (S.tags.size) p.set('tags', [...S.tags].join(','));
+  if (S.fam) p.set('family', S.fam);
+  if (S.w0 !== null) { p.set('from', isoDay(WEEKS[S.w0])); p.set('to', isoDay(WEEKS[S.w1])); }
+  if (S.sel !== null) p.set('entry', S.sel);
+  const h = p.toString();
+  $('toLedger').href = 'atlas.html' + (h ? '#' + h : '');
+  if (PRESENT) p.set('deck', '1');
+  const h2 = p.toString();
+  history.replaceState(null, '', h2 ? '#' + h2 : location.pathname + location.search);
+}
+let wantDeck = false;
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  S.q = p.get('q') || ''; $('q').value = S.q; ftIds = null; S.place = null;
+  S.fam = FAMILIES.some(f => f.key === p.get('family')) ? p.get('family') : '';
+  S.tags = new Set((p.get('tags') || '').split(',').filter(t => TAGN.has(t)));
+  wantDeck = p.get('deck') === '1';
+  S.w0 = S.w1 = null;
+  const f = p.get('from'), t = p.get('to');
+  if (f && t) { const wi = s => WEEKS.findIndex(d => isoDay(d) === s), a = wi(f), b = wi(t); if (a >= 0 && b >= 0) { S.w0 = Math.min(a, b); S.w1 = Math.max(a, b); } }
+  const e = +p.get('entry'); return BYID.has(e) ? e : null;
+}
+function applyHash() {
+  const entry = readHash(); S.sel = null; REL = [];
+  applyFilters();
+  if (S.q.length >= 3) setQuery(S.q);
+  if (entry !== null) openEntry(entry, true);
+  present(wantDeck, wantDeck);
+}
+addEventListener('hashchange', () => { if (N) applyHash(); });
+new ResizeObserver(() => { resize(); if (WEEKS.length) renderTime(); }).observe($('mapwrap'));
+
+// When the page is returned to (tab shown again, or restored from the back/forward cache),
+// ask whether the archive has grown since it was loaded, and reload if so. The address
+// keeps the search, filters and open link, so nothing is lost.
+let DATA_STAMP = 0, lastCheck = Date.now();
+async function checkFresh() {
+  if (!DATA_STAMP || Date.now() - lastCheck < 60000) return;
+  lastCheck = Date.now();
+  try {
+    const r = await fetch('atlas.php', { cache: 'no-cache' }); if (!r.ok) return;
+    const d = await r.json();
+    if (d.updated && d.updated !== DATA_STAMP) location.reload();
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkFresh(); });
+addEventListener('pageshow', ev => { if (ev.persisted) checkFresh(); });
+
+/* =====================================================================
+   Start
+   ===================================================================== */
+(async function main() {
+  syncTheme(); syncClimate(); syncAuto();
+  try { SEEN = new Set(JSON.parse(localStorage.getItem('visitedLinks') || '[]')); } catch (e) {}
+  let data;
+  try {
+    const r = await fetch('atlas.php', { cache: 'no-cache' }); // always check for new entries
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    data = await r.json();
+    DATA_STAMP = data.updated || 0;
+  } catch (err) {
+    $('status').textContent = `The archive could not be loaded (${err.message}). Check that atlas.php and ai_updates.sqlite are in the same folder as this page.`;
+    $('sub').textContent = 'Archive unavailable';
+    return;
+  }
+  if (!(data.entries || []).length) { $('status').textContent = 'The archive is empty.'; return; }
+  $('status').textContent = 'Reading the archive…';
+  await new Promise(r => setTimeout(r, 30));
+  build(data);
+  BYFAM = FAMILIES.map(() => []); for (let i = 0; i < N; i++) BYFAM[FAM[i]].push(i);
+  readColours();
+  if (reduced) { // no animation wanted: settle out of sight, then show the result
+    $('status').textContent = 'Drawing the map…';
+    await new Promise(r => setTimeout(r, 30));
+    while (nbDone < N) { findNeighbours(40); await new Promise(r => setTimeout(r, 0)); }
+    for (let s = 0; s < 500; s++) { heat = Math.max(0.3, 1 - s / 400); stepSim(); if (s % 50 === 49) await new Promise(r => setTimeout(r, 0)); }
+    heat = 0;
+  }
+  $('status').hidden = true;
+  resize();
+  applyHash();
+  relabel();
+  startLoop();
+  if (reduced) draw();
+})();
+</script>
+</body>
+</html>
