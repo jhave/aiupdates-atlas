@@ -142,6 +142,8 @@ button { cursor: pointer; }
 .bars .n { color: var(--faint); font-variant-numeric: tabular-nums; font-size: 11.5px; position: relative; z-index: 1; }
 .bars button.on .lab { color: var(--ink); font-weight: 600; }
 .bars button.zero .lab { color: var(--faint); }
+.fold { display: flex; justify-content: space-between; align-items: baseline; width: 100%; border: 0; background: none; padding: 0; font: inherit; color: inherit; text-align: left; }
+.fold .arrow { color: var(--muted); font-size: 11px; }
 .famh { margin: 12px 0 2px; font-size: 11.5px; color: var(--faint); }
 .bars .fill { position: absolute; left: 0; bottom: 1px; height: 2px; border-radius: 1px; opacity: .75; }
 
@@ -821,8 +823,21 @@ function bars(items, max, kind, colorOf) {
     `<span class="fill" style="width:${(100 * n / max).toFixed(1)}%;background:${colorOf ? colorOf(k) : 'var(--faint)'}"></span></button></li>`).join('') + '</ul>';
 }
 
+// On narrow screens the panel sits above the list, so it is kept short: categories with
+// MIN_TAG_NARROW links or fewer in the whole archive are left out (unless selected), and
+// each section folds away with its arrow.
+const MIN_TAG_NARROW = 20;
+let TAGTOTAL = null;
+let CTXSHUT = {};
+try { CTXSHUT = JSON.parse(localStorage.getItem('atlasCtxShut') || '{}') || {}; } catch (e) {}
 function renderContext() {
   const ctx = $('context');
+  const narrow = !wide();
+  if (!TAGTOTAL) { TAGTOTAL = new Map(); for (const e of E) for (const t of e.tags) TAGTOTAL.set(t, (TAGTOTAL.get(t) || 0) + 1); }
+  const head = (key, title) => narrow
+    ? `<h3><button type="button" class="fold" data-fold="${key}" aria-expanded="${!CTXSHUT[key]}">${title}<span class="arrow" aria-hidden="true">${CTXSHUT[key] ? '▼' : '▲'}</span></button></h3>`
+    : `<h3>${title}</h3>`;
+  const open = key => !narrow || !CTXSHUT[key];
   if (!filtered.length) { ctx.innerHTML = '<section><p class="note">Nothing matches. Remove a filter above.</p></section>'; return; }
   const html = [];
 
@@ -833,9 +848,12 @@ function renderContext() {
   const note = S.tags.length
     ? 'Counts are within the current list. Select several categories to rank links by how many they share.'
     : 'Click a category to filter. Select several to rank links by how many they share.';
-  html.push(`<section><h3>Categories</h3><p class="note">${note}</p>`);
+  html.push(`<section>${head('cat', 'Categories')}`);
+  if (open('cat')) html.push(`<p class="note">${note}</p>`);
   // most common first; categories absent from the current list go last, in schema order
-  const order = ROWS.slice().sort((x, y) => (tc.get(y) || 0) - (tc.get(x) || 0));
+  let order = ROWS.slice().sort((x, y) => (tc.get(y) || 0) - (tc.get(x) || 0));
+  if (narrow) order = order.filter(t => (TAGTOTAL.get(t) || 0) > MIN_TAG_NARROW || S.tags.includes(t));
+  if (!open('cat')) order = [];
   html.push('<ul class="bars">');
   for (const t of order) {
     const n = tc.get(t) || 0, on = S.tags.includes(t);
@@ -850,12 +868,13 @@ function renderContext() {
   const dc = new Map();
   for (const e of filtered) if (e.dom) dc.set(e.dom, (dc.get(e.dom) || 0) + 1);
   const dl = Array.from(dc).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  if (dl.length) html.push(`<section><h3>Sources</h3>${bars(dl, dl[0][1], 'dom')}</section>`);
+  if (dl.length) html.push(`<section>${head('src', 'Sources')}${open('src') ? bars(dl, dl[0][1], 'dom') : ''}</section>`);
   ctx.innerHTML = html.join('');
 }
 $('context').addEventListener('click', ev => {
   const b = ev.target.closest('button'); if (!b) return;
-  if (b.dataset.tag) toggleTag(b.dataset.tag);
+  if (b.dataset.fold) { CTXSHUT[b.dataset.fold] = !CTXSHUT[b.dataset.fold]; try { localStorage.setItem('atlasCtxShut', JSON.stringify(CTXSHUT)); } catch (e) {} renderContext(); }
+  else if (b.dataset.tag) toggleTag(b.dataset.tag);
   else if (b.dataset.dom) { S.dom = S.dom === b.dataset.dom ? '' : b.dataset.dom; applyFilters(); }
 });
 
@@ -1164,7 +1183,7 @@ addEventListener('hashchange', () => {
   if (entry !== null) select(entry);
 });
 let rT = null;
-addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => LG && renderLedger(), 120); });
+addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (LG) renderLedger(); if (N) renderContext(); }, 120); });
 
 /* =====================================================================
    Start
