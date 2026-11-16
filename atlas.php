@@ -83,7 +83,9 @@ $mtime = @filemtime($dbFile) ?: time();
 $etag = '"atlas-' . $mtime . '"';
 header('ETag: ' . $etag);
 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
-header('Cache-Control: public, max-age=300');
+// Always ask the server whether the archive has changed. The ETag makes this cheap:
+// when nothing is new the answer is an empty 304 and the browser reuses its copy.
+header('Cache-Control: no-cache');
 if (trim($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) { http_response_code(304); exit; }
 
 if (!ini_get('zlib.output_compression') && extension_loaded('zlib')) { ob_start('ob_gzhandler'); }
