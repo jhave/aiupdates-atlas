@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Updates Atlas V10: living map</title>
+<title>AI Updates Atlas: living map</title>
 <meta name="description" content="A map of AI research links saved by David Jhave Johnston during postdoctoral work at the Center for Digital Narrative, University of Bergen. Links that share vocabulary sit together; a time strip shows when each area was active.">
 <meta name="author" content="David Jhave Johnston">
 <script>
@@ -98,7 +98,7 @@ kbd { font: 11px var(--sans); border: 1px solid var(--rule); border-bottom-width
 .paths button.near { border-style: dashed; color: var(--muted); }
 .paths button span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .paths button:disabled { opacity: .4; cursor: default; }
-.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
+.transport { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; }
 .transport .pill { background: var(--bg); padding: 4px 12px; font-size: 12.5px; }
 .transport .pill[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .transport .step { padding: 1px 11px 3px; font-size: 17px; line-height: 1.2; }
@@ -111,28 +111,11 @@ button.chip:hover { border-color: var(--ink); }
 .actions .open, .actions .fold2 { margin: 0; }
 .actions .back { margin-left: auto; }
 .count { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; margin-left: 4px; }
-.meta .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.tag-picker { width: min(540px, calc(100% - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); color: var(--ink); }
-.tag-picker::backdrop { background: rgb(13 20 30 / .49); }
-.tag-picker form { display: flex; flex-direction: column; max-height: calc(100dvh - 26px); }
-.tag-picker header, .tag-picker footer { padding: 16px 20px; }
-.tag-picker h2 { margin: 0 0 4px; font: 400 26px/1.2 var(--serif); }
-.tag-picker p { margin: 0 0 12px; color: var(--muted); }
-.tag-picker input[type="search"] { width: 100%; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); }
-.tag-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; min-height: 0; overflow-y: auto; padding: 4px 20px; }
-.tag-options label { display: flex; align-items: center; gap: 6px; min-height: 34px; overflow-wrap: anywhere; cursor: pointer; }
-.tag-options label[hidden] { display: none; }
-.tag-options input { flex: none; accent-color: var(--ink); }
-.tag-options small { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
-.tag-picker #tagEmpty { padding: 0 20px; }
-.tag-picker footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px solid var(--rule); }
-.tag-picker footer .pill { padding: 5px 12px; }
-.tag-picker #tagApply { margin-left: auto; background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.tag-picker output { color: var(--muted); font-size: 12px; }
-@media (max-width: 480px) {
-  .tag-options { grid-template-columns: 1fr; }
-  .tag-picker header, .tag-picker footer, .tag-options { padding-inline: 12px; }
-}
+.anyall > * { font-size: 11.5px; padding: 1px 9px; }
+.subjects { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+.subjects .chip small { color: var(--faint); font-size: 11px; }
+.subjects .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.subjects .chip[aria-pressed="true"] small { color: inherit; opacity: .7; }
 
 /* ---------- presenting: the reader becomes a slide, the map a side rail ---------- */
 .deckbar { display: none; }
@@ -167,12 +150,6 @@ body.present .deckbar { display: flex; position: fixed; left: 0; right: 0; botto
   body.present .mapwrap { height: 22vh; min-height: 0; }
   body.present .panel { padding: 20px 16px 90px; overflow: visible; }
   body.present .deckbar .seg, body.present .deckbar #dfull, body.present .deckbar .subject { display: none; }
-}
-@media (max-width: 480px) {
-  body.present .deckbar { gap: 4px; padding-inline: 8px; }
-  .deckbar .sp { display: none; }
-  .deckbar .pill { padding-inline: 7px; }
-  .deckbar #deckCount { flex: 1; min-width: 0; font-size: 11px; }
 }
 .fold2 { border: 0; background: none; padding: 0; margin: 0 0 8px; font-size: 12.5px; color: var(--muted); }
 .fold2:hover { color: var(--ink); }
@@ -342,29 +319,9 @@ body.present .deckbar { display: flex; position: fixed; left: 0; right: 0; botto
   <span id="deckCount"></span>
   <div class="seg" role="group" aria-label="Which link comes next"><button type="button" data-auto="date" aria-pressed="false" title="Next is the newest link not yet shown">by date</button><button type="button" data-auto="theme" aria-pressed="true" title="Next is a link tied to this one">by theme</button></div>
   <span class="sp"></span>
-  <button type="button" class="pill" id="deckTags" data-choose-tags aria-haspopup="dialog">Tags</button>
   <button type="button" class="pill" id="dfull" title="Full screen (f)">Full screen</button>
   <button type="button" class="pill" id="dexit" title="Leave the presentation (Esc)">Exit</button>
 </div>
-
-<dialog class="tag-picker" id="tagPicker" aria-labelledby="tagTitle" aria-describedby="tagHelp">
-  <form id="tagForm">
-    <header>
-      <h2 id="tagTitle">Choose tags</h2>
-      <p id="tagHelp">Links can match any of the selected tags.</p>
-      <label class="sr-only" for="tagSearch">Find a tag</label>
-      <input id="tagSearch" type="search" placeholder="Find a tag" autocomplete="off" autofocus>
-    </header>
-    <div class="tag-options" id="tagOptions" role="group" aria-label="Archive tags"></div>
-    <p id="tagEmpty" hidden>No matching tags.</p>
-    <footer>
-      <output id="tagCount" aria-live="polite"></output>
-      <button type="button" class="pill" id="tagClear">Clear all</button>
-      <button type="button" class="pill" id="tagCancel">Cancel</button>
-      <button type="submit" class="pill" id="tagApply">Apply tags</button>
-    </footer>
-  </form>
-</dialog>
 
 <script>
 'use strict';
@@ -493,7 +450,7 @@ let FAM, ST, ALIVE;       // family index; display state (0 faint, 1 outside cho
 let NB, NW, nbDone = 0;   // neighbours and their weights, found progressively after load
 let TERMS = [], TERM_NAME = [], TERM_DF = [], TERM_PAIR = []; // per entry: ids of the words and pairs that may name a place
 let SEEN = new Set();
-const S = { q: '', fam: '', tags: new Set(), w0: null, w1: null, place: null, sel: null };
+const S = { q: '', fam: '', tags: [], tagAll: false, w0: null, w1: null, place: null, sel: null };
 let TAGN = new Map();     // category -> number of links
 let PRESENT = false;      // showing the selection as slides
 const P = { k: 8, pull: 1, drift: !reduced }; // the climate: reach, pull, and whether they wander by themselves
@@ -840,7 +797,7 @@ function relabel() {
   }
   for (const l of old.values()) if (l.alpha > 0.05) { l.want = 0; next.push(l); } // names that no longer apply fade out
   LABELS = next;
-  if (!PRESENT && S.sel === null && S.place === null && !S.q && !S.tags.size && !panelBusy && !$('panel').contains(document.activeElement)) renderPanel();
+  if (S.sel === null && S.place === null && !S.q && !panelBusy) renderPanel();
 }
 
 /* =====================================================================
@@ -917,7 +874,7 @@ function tick(now) {
     const i = BYID.get(S.sel).i, tx = cw / 2 - X[i] * view.k, ty = ch / 2 - Y[i] * view.k;
     view.x += (tx - view.x) * 0.08; view.y += (ty - view.y) * 0.08;
   }
-  if (AUTO.on && !$('tagPicker').open) { AUTO.t += dtSec; if (AUTO.t >= AUTO.dwell) autoNext(); }
+  if (AUTO.on) { AUTO.t += dtSec; if (AUTO.t >= AUTO.dwell) autoNext(); }
   if (++frameN % 40 === 0) syncPaths();
   if (now - labelAt > (heat > 0.6 ? 900 : 2200)) relabel();
   draw();
@@ -1125,7 +1082,7 @@ $('zfit').addEventListener('click', () => { const f = frame(); if (f) flyTo(f); 
    the whole archive. Search and family only dim what does not match.
    ===================================================================== */
 function passes(e) {
-  if (S.tags.size && !e.tags.some(t => S.tags.has(t))) return false;
+  if (S.tags.length && !(S.tagAll ? S.tags.every(t => e.tags.includes(t)) : S.tags.some(t => e.tags.includes(t)))) return false;
   if (S.fam && FAMILIES[FAM[e.i]].key !== S.fam) return false;
   if (S.q) { const q = S.q.toLowerCase(); if (!e.hay.includes(q) && !(ftIds && ftIds.has(e.id))) return false; }
   return true;
@@ -1157,84 +1114,22 @@ function applyFilters(keepPanel) {
   if (born) kick(0.8);
   renderTime(); renderLegend();
   if (!keepPanel) renderPanel();
-  syncDeck();
   writeHash();
   if (!running) { relabel(); draw(); }
 }
-function setTags(tags) {
-  if (tags.size === S.tags.size && [...tags].every(t => S.tags.has(t))) return;
-  S.tags = tags;
-  const current = BYID.get(S.sel);
-  const keep = current && ALIVE[current.i] && (!S.place || S.place.mask[current.i]) && passes(current);
-  if (!keep) { S.sel = null; REL = []; track = false; }
-  TRAIL = keep ? [current.i] : [];
-  READ = new Set(TRAIL); readVersion++; AUTO.t = 0;
-  const advance = !keep && (PRESENT || AUTO.on || !!current);
-  const panel = $('panel'), scroll = panel.scrollTop;
-  applyFilters(advance);
-  if (advance) {
-    autoNext();
-    if (S.sel === null) renderPanel();
-  }
-  panel.scrollTop = keep ? scroll : 0;
+// Subjects. Several categories can be chosen together: "any" gathers links filed under
+// at least one of them, "all" only those filed under every one.
+const subjectName = () => S.tags.map(label).join(S.tagAll ? ' + ' : ' / ');
+function setTag(t) { // choose a category as a subject; choosing it again lets it go
+  stopAuto(); track = false;
+  S.tags = S.tags.includes(t) ? S.tags.filter(x => x !== t) : S.tags.concat(t);
+  if (S.tags.length < 2) S.tagAll = false;
+  S.sel = null; REL = [];
+  if (PRESENT) { READ = new Set(); TRAIL = []; readVersion++; }
+  applyFilters();
+  if (PRESENT) autoNext();
+  $('panel').scrollTop = 0;
 }
-function toggleTag(t) {
-  const tags = new Set(S.tags);
-  if (tags.has(t)) tags.delete(t); else tags.add(t);
-  setTags(tags);
-}
-const tagPicker = $('tagPicker');
-let tagOpener = null;
-function tagsButton() {
-  return `<button type="button" class="pill" data-choose-tags aria-haspopup="dialog">${tagsButtonLabel()}</button>`;
-}
-function tagsButtonLabel() { return S.tags.size ? `Tags (${fmtN(S.tags.size)})` : 'Tags'; }
-function syncTagPicker() {
-  const q = $('tagSearch').value.trim().toLowerCase();
-  let visible = 0, selected = 0;
-  for (const row of $('tagOptions').children) {
-    row.hidden = !row.children[1].textContent.toLowerCase().includes(q) && !row.firstElementChild.value.toLowerCase().includes(q);
-    if (!row.hidden) visible++;
-    if (row.firstElementChild.checked) selected++;
-  }
-  $('tagEmpty').hidden = visible > 0;
-  $('tagCount').value = `${fmtN(selected)} selected`;
-  $('tagClear').disabled = selected === 0;
-}
-function chooseTags(button) {
-  if (!N) return;
-  tagOpener = button;
-  $('tagSearch').value = '';
-  const options = $('tagOptions');
-  options.innerHTML = Array.from(TAGN).sort((a, b) => Number(S.tags.has(b[0])) - Number(S.tags.has(a[0])) ||
-    b[1] - a[1] || label(a[0]).localeCompare(label(b[0]))).map(([t, n]) =>
-    `<label><input type="checkbox" value="${esc(t)}"${S.tags.has(t) ? ' checked' : ''}><span>${esc(label(t))}</span><small>${fmtN(n)}</small></label>`).join('');
-  syncTagPicker();
-  tagPicker.showModal();
-  options.scrollTop = 0;
-}
-$('tagSearch').addEventListener('input', () => { $('tagOptions').scrollTop = 0; syncTagPicker(); });
-$('tagOptions').addEventListener('change', syncTagPicker);
-$('tagClear').addEventListener('click', () => {
-  $('tagOptions').querySelectorAll(':checked').forEach(input => { input.checked = false; });
-  syncTagPicker();
-  $('tagSearch').focus();
-});
-function restoreTagFocus() {
-  if (!tagOpener) return;
-  const opener = tagOpener.isConnected ? tagOpener : $('panel').querySelector('[data-choose-tags]');
-  tagOpener = null;
-  opener?.focus({ preventScroll: true });
-}
-$('tagCancel').addEventListener('click', () => tagPicker.close());
-$('tagForm').addEventListener('submit', ev => {
-  ev.preventDefault();
-  setTags(new Set(Array.from($('tagOptions').querySelectorAll(':checked'), input => input.value)));
-  tagPicker.close();
-  restoreTagFocus();
-});
-tagPicker.addEventListener('close', restoreTagFocus);
-$('deckTags').addEventListener('click', ev => chooseTags(ev.currentTarget));
 function setPlace(l) {
   if (l) {
     const mask = new Uint8Array(N); for (let m = 0; m < l.mem.length; m++) mask[l.mem[m]] = 1;
@@ -1345,7 +1240,8 @@ const CHUNK = 150; let shownRows = CHUNK, panelBusy = false;
 function chipsHTML() {
   const c = [];
   if (S.place) c.push(`<button class="chip" data-clear="place">${esc(S.place.name)}<span class="x" aria-hidden="true">×</span></button>`);
-  for (const t of S.tags) c.push(`<button type="button" class="chip" data-tag="${esc(t)}" aria-label="Remove ${esc(label(t))}"><i style="background:var(--${TAG_FAMILY[t] || 'other'})"></i>${esc(label(t))}<span class="x" aria-hidden="true">×</span></button>`);
+  for (const t of S.tags) c.push(`<button class="chip" data-tag="${esc(t)}" title="Remove this subject"><i style="background:var(--${TAG_FAMILY[t] || 'other'})"></i>${esc(label(t))}<span class="x" aria-hidden="true">×</span></button>`);
+  if (S.tags.length > 1) c.push(`<span class="seg anyall" role="group" aria-label="How the subjects combine"><button type="button" data-tagall="0" aria-pressed="${!S.tagAll}" title="Links filed under at least one of these">any</button><button type="button" data-tagall="1" aria-pressed="${S.tagAll}" title="Only links filed under every one of these">all</button></span>`);
   if (S.q) c.push(`<button class="chip" data-clear="q">“${esc(S.q)}”<span class="x" aria-hidden="true">×</span></button>`);
   if (S.fam) c.push(`<button class="chip" data-clear="fam"><i style="background:var(--${S.fam})"></i>${esc(FAMILIES.find(f => f.key === S.fam).name)}<span class="x" aria-hidden="true">×</span></button>`);
   if (S.w0 !== null) c.push(`<button class="chip" data-clear="time">${esc(periodLabel())}<span class="x" aria-hidden="true">×</span></button>`);
@@ -1356,24 +1252,27 @@ function rowsHTML(list) {
     `<li><button type="button" data-id="${e.id}" class="${SEEN.has(e.link) ? 'seen' : ''}"><span class="d">${fmtShort(e.d)}</span>` +
     `<span class="t">${e.who ? `<b>${esc(e.who)}</b>` : ''}${esc(e.full)}</span><span class="m">${esc(e.dom)}</span></button></li>`).join('');
 }
+function subjectsHTML() {
+  return `<div class="subjects">` + Array.from(TAGN).filter(([t, n]) => n > TAG_MIN && t !== NOCAT).sort((a, b) => b[1] - a[1]).map(([t, n]) =>
+    `<button type="button" class="chip" data-tag="${esc(t)}" aria-pressed="${S.tags.includes(t)}"><i style="background:var(--${TAG_FAMILY[t] || 'other'})"></i>${esc(label(t))} <small>${fmtN(n)}</small></button>`).join('') + `</div>`;
+}
+let SUBJ_OPEN = false;
 function renderPanel() {
   clearTimeout(panelT);
   const p = $('panel');
   if (S.sel !== null) { renderReader(p); return; }
-  if (PRESENT && !LIST.length) {
-    p.innerHTML = '<h2>No matching links</h2><p class="body">Change the tags or exit the presentation to edit other filters.</p>';
-    return;
-  }
-  if (!S.place && !S.q && !S.tags.size) { renderOverview(p); return; }
+  if (!S.place && !S.q && !S.tags.length) { renderOverview(p); return; }
   shownRows = CHUNK;
   let h = `<button class="back" type="button" data-clear="all">← Whole map</button>`;
   if (S.place) h += `<h2>${esc(S.place.name)}</h2>` + (S.place.also.length ? `<p class="terms">Also: ${S.place.also.map(esc).join(', ')}</p>` : '') +
     `<p class="lead">The links that were gathered here when you chose it. The map keeps moving; this list stays as it was.</p>`;
-  else if (S.tags.size) h += `<h2>${S.tags.size === 1 ? esc(label([...S.tags][0])) : 'Selected tags'}</h2>`;
+  else if (S.tags.length) h += `<h2>${esc(subjectName())}</h2>`;
   else h += `<h2>Search</h2>`;
   h += chipsHTML();
   h += `<div class="transport"><button type="button" class="pill" data-autotoggle aria-pressed="${AUTO.on}" title="Open these links one after another, newest first">${AUTO.on ? '❚❚ Pause' : '▶ Read along'}</button>` +
-       `<button type="button" class="pill" data-present title="Show these links as slides, newest first">Present as slides</button>${tagsButton()}</div>`;
+       `<button type="button" class="pill" data-present title="Show these links as slides, newest first">Present as slides</button>` +
+       (S.tags.length ? `<button type="button" class="fold2" style="margin:0 0 0 6px" data-subjtoggle aria-expanded="${SUBJ_OPEN}">Add or remove subjects <span aria-hidden="true">${SUBJ_OPEN ? '▲' : '▼'}</span></button>` : '') + `</div>`;
+  if (S.tags.length && SUBJ_OPEN) h += subjectsHTML();
   h += `<p class="kicker" style="margin-bottom:6px"><span>${fmtN(LIST.length)} ${LIST.length === 1 ? 'link' : 'links'}, newest first</span></p>`;
   h += LIST.length ? `<ul class="rows" id="rows">${rowsHTML(LIST.slice(0, shownRows))}</ul>` : `<p class="note">Nothing here matches. Remove a filter above.</p>`;
   if (LIST.length > shownRows) h += `<button class="pill more" type="button" id="more">Show more</button>`;
@@ -1386,7 +1285,8 @@ function renderOverview(p) {
     `<h2>${fmtN(aliveN)} links${S.w0 !== null ? ' in this period' : ''}</h2>` +
     `<p class="lead">Each dot is a saved link, held near the links whose words it shares. Nothing is fixed in place. The names are read off whatever has gathered in each part of the view, so they change as you zoom in and as the map shifts.</p>` +
     chipsHTML() +
-    `<div class="transport">${tagsButton()}</div>` +
+    `<p class="kicker" style="margin-bottom:6px"><span>Subjects: choose one or several, then read along or present</span></p>` +
+    subjectsHTML() +
     `<h3>Gathered in view now</h3>` +
     `<p class="kicker" style="margin-bottom:4px"><span>Names read off the map</span><span style="margin-left:auto">links</span></p>` +
     (live.length ? `<ul class="topics">` + live.map((l, q) =>
@@ -1436,17 +1336,16 @@ let PATHS_OPEN = false;
 try { PATHS_OPEN = localStorage.getItem('atlasPathsOpen') === '1'; } catch (e) {}
 function renderReader(p) {
   const e = BYID.get(S.sel);
-  const backTo = S.place ? esc(S.place.name) : S.tags.size ? 'selected tags' : S.q ? 'search results' : 'the whole map';
+  const backTo = S.place ? esc(S.place.name) : S.tags.length ? esc(subjectName()) : S.q ? 'search results' : 'the whole map';
   const pos = LIST.findIndex(o => o.id === e.id);
   const head = PRESENT && e.who ? e.st : e.full; // on a slide, a post from X is headed by its first sentence; the whole post follows
   p.innerHTML =
     `<div class="transport"><button type="button" class="pill step" data-prev aria-label="Previous link" title="Back to the previous link (b)">‹</button>` +
       `<button type="button" class="pill" data-autotoggle aria-pressed="${AUTO.on}" title="Open links one after another. Space starts and pauses.">${AUTO.on ? '❚❚ Pause' : '▶ Read along'}</button>` +
       `<button type="button" class="pill step" data-next aria-label="Next link" title="On to the next link (n)">›</button>` +
-      tagsButton() +
       (pos >= 0 ? `<span class="count">${fmtN(pos + 1)} of ${fmtN(LIST.length)}, newest first</span>` : '') + `</div>` +
     `<p class="kicker meta"><span>${fmtDate(e.d)}</span><span>${esc(e.dom)}</span>` +
-      e.tags.map(g => `<button type="button" class="chip" data-tag="${esc(g)}" aria-pressed="${S.tags.has(g)}" title="Toggle ${esc(label(g))} in the tag filter"><i style="background:var(--${TAG_FAMILY[g] || 'other'})"></i>${esc(label(g))}</button>`).join('') + `</p>` +
+      e.tags.map(g => `<button type="button" class="chip" style="background:none" data-tag="${esc(g)}" title="Make ${esc(label(g))} the subject"><i style="background:var(--${TAG_FAMILY[g] || 'other'})"></i>${esc(label(g))}</button>`).join('') + `</p>` +
     `<h2 class="${head.length > 110 ? 'long' : ''}">${e.who ? esc(e.who) + ': ' : ''}${esc(head)}</h2>` +
     `<div class="actions"><a class="open" href="${esc(safeHref(e.link))}" target="_blank" rel="noopener noreferrer" data-visit>Open the article</a>` +
       `<button type="button" class="fold2" data-pathtoggle aria-expanded="${PATHS_OPEN}">Ways on from here <span aria-hidden="true">${PATHS_OPEN ? '▲' : '▼'}</span></button>` +
@@ -1484,7 +1383,7 @@ function newestUnread() {
 function pathTargets(i) {
   const cand = [], base = i * KMAX;
   for (let q = 0; q < KMAX; q++) {
-    const j = NB[base + q]; if (j < 0) break; if (!ALIVE[j] || ST[j] !== 2 || READ.has(j)) continue;
+    const j = NB[base + q]; if (j < 0) break; if (!ALIVE[j] || !ST[j] || READ.has(j)) continue;
     const dx = X[j] - X[i], dy = Y[j] - Y[i], d = Math.hypot(dx, dy) || 1e-6;
     cand.push({ j, ux: dx / d, uy: dy / d, w: NW[base + q], linked: true });
   }
@@ -1544,7 +1443,7 @@ function syncPaths() { // the four buttons in the reader mirror the arrows on th
    from the open link to one not yet read, favouring recent links, and
    when a thread runs out starts again from the newest unread link.
    "By date" simply goes from newest to oldest. Both keep to the current
-   tags, search, family, period and place.
+   search, family, period and place.
    ===================================================================== */
 function autoNext() {
   AUTO.t = 0;
@@ -1581,7 +1480,7 @@ $('next').addEventListener('click', autoNext);
 $('prev').addEventListener('click', stepBack);
 
 /* =====================================================================
-   Presenting. The current selection (tags, a search, a place, a
+   Presenting. The current selection (a subject, a search, a place, a
    period, or everything) is shown one link at a time as large slides,
    newest first, with the map as a side rail showing where each one sits.
    Right arrow, Page Down or a clicker moves on; left goes back; Space
@@ -1589,33 +1488,27 @@ $('prev').addEventListener('click', stepBack);
    "by theme" follows ties within the selection. Starting a presentation
    forgets what was read before, so it always begins from the newest.
    ===================================================================== */
-function present(on, reset = false) {
-  if (!!on === PRESENT && !reset) return;
+function present(on) {
+  if (!!on === PRESENT) return;
   PRESENT = !!on; document.body.classList.toggle('present', PRESENT);
   if (PRESENT) {
     stopPlay();
     AUTO.mode = 'date'; // a presentation starts newest first; "by theme" is one press away
     READ = new Set(); TRAIL = []; readVersion++;
-    if (S.sel !== null && LIST.some(e => e.id === S.sel)) {
-      const i = BYID.get(S.sel).i; READ.add(i); TRAIL = [i]; track = true;
-    } else {
-      S.sel = null; REL = []; track = false; autoNext();
-    }
+    if (S.sel !== null) { const i = BYID.get(S.sel).i; READ.add(i); TRAIL = [i]; track = true; } else autoNext();
   } else {
     stopAuto();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
-  renderPanel(); syncAuto(); writeHash();
+  syncAuto(); renderPanel(); writeHash(); // syncAuto also shows which order is in use
   setTimeout(() => { resize(); follow = !track; startLoop(); }, 60);
 }
 function syncDeck() {
   if (!PRESENT) return;
-  const bits = S.tags.size ? [[...S.tags].map(label).join(', ')] : [];
-  if (S.place) bits.push(S.place.name); if (S.q) bits.push('“' + S.q + '”');
+  const bits = [];
+  if (S.tags.length) bits.push(subjectName()); if (S.place) bits.push(S.place.name); if (S.q) bits.push('“' + S.q + '”');
   if (S.fam) bits.push(FAMILIES.find(f => f.key === S.fam).name); if (S.w0 !== null) bits.push(periodLabel());
-  const subject = bits.length ? bits.join(' · ') : 'All links';
-  $('deckSubject').textContent = $('deckSubject').title = subject;
-  $('deckTags').textContent = tagsButtonLabel();
+  $('deckSubject').textContent = bits.length ? bits.join(' · ') : 'All links';
   const pos = S.sel !== null ? LIST.findIndex(o => o.id === S.sel) : -1;
   $('deckCount').textContent = AUTO.mode === 'date' && pos >= 0 ? `${fmtN(pos + 1)} / ${fmtN(LIST.length)}` : `${fmtN(TRAIL.length)} shown of ${fmtN(LIST.length)}`;
 }
@@ -1660,7 +1553,7 @@ function markSeen(e) {
 function clearFilter(what) {
   const hadPlace = !!S.place;
   if (what === 'place' || what === 'all') S.place = null;
-  if (what === 'all') S.tags.clear();
+  if (what === 'tag' || what === 'all') { S.tags = []; S.tagAll = false; }
   if (what === 'q' || what === 'all') { S.q = ''; $('q').value = ''; ftIds = null; }
   if (what === 'fam' || what === 'all') S.fam = '';
   if (what === 'time' || what === 'all') { stopPlay(); S.w0 = S.w1 = null; }
@@ -1673,12 +1566,9 @@ $('panel').addEventListener('click', ev => {
   else if (b.id === 'more') { shownRows += CHUNK; $('rows').innerHTML = rowsHTML(LIST.slice(0, shownRows)); if (LIST.length <= shownRows) b.remove(); }
   else if (b.dataset.close !== undefined) closeEntry();
   else if (b.dataset.move) move(b.dataset.move);
-  else if (b.dataset.chooseTags !== undefined) chooseTags(b);
-  else if (b.dataset.tag) {
-    toggleTag(b.dataset.tag);
-    const target = [...$('panel').querySelectorAll('[data-tag]')].find(chip => chip.dataset.tag === b.dataset.tag);
-    (target || (PRESENT ? $('deckTags') : $('panel').querySelector('[data-choose-tags]')))?.focus({ preventScroll: true });
-  }
+  else if (b.dataset.tag) setTag(b.dataset.tag);
+  else if (b.dataset.tagall !== undefined) { S.tagAll = b.dataset.tagall === '1'; stopAuto(); S.sel = null; REL = []; if (PRESENT) { READ = new Set(); TRAIL = []; readVersion++; } applyFilters(); }
+  else if (b.dataset.subjtoggle !== undefined) { SUBJ_OPEN = !SUBJ_OPEN; renderPanel(); }
   else if (b.dataset.present !== undefined) present(true);
   else if (b.dataset.prev !== undefined) stepBack();
   else if (b.dataset.next !== undefined) autoNext();
@@ -1736,15 +1626,13 @@ function setQuery(v) {
   S.q = v.trim(); ftIds = null; S.sel = null; REL = [];
   applyFilters();
   clearTimeout(qTimer);
+  if (S.q.length < 3) return;
   const mine = ++qSeq;
-  const query = S.q;
-  if (query.length < 3) return;
   qTimer = setTimeout(async () => {
     try {
-      const r = await fetch(`atlas.php?q=${encodeURIComponent(query)}`); if (!r.ok) return;
-      const j = await r.json(); if (mine !== qSeq || query !== S.q) return;
+      const r = await fetch(`atlas.php?q=${encodeURIComponent(S.q)}`); if (!r.ok) return;
+      const j = await r.json(); if (mine !== qSeq) return;
       ftIds = new Set(j.ids || []); applyFilters(S.sel !== null);
-      if (PRESENT && S.sel === null && LIST.length) autoNext();
     } catch (err) { /* title and summary search still works */ }
   }, 350);
 }
@@ -1766,7 +1654,6 @@ $('theme').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', ev => {
-  if (tagPicker.open) return;
   const inField = ev.target.matches('input, textarea, select');
   if (ev.key === '/' && !inField) { ev.preventDefault(); $('q').focus(); $('q').select(); return; }
   if (ev.key === 'Escape') {
@@ -1800,17 +1687,19 @@ document.addEventListener('keydown', ev => {
   }
 });
 
-// The address keeps tags, search, period, family and the open link, in the same form as the
+// The address keeps search, period, family and the open link, in the same form as the
 // Ledger view, so the links to the other views carry the current selection across.
 function writeHash() {
   const p = new URLSearchParams();
   if (S.q) p.set('q', S.q);
-  if (S.tags.size) p.set('tags', [...S.tags].join(','));
+  if (S.tags.length) p.set('tags', S.tags.join(','));
+  if (S.tagAll) p.set('match', 'all');
   if (S.fam) p.set('family', S.fam);
   if (S.w0 !== null) { p.set('from', isoDay(WEEKS[S.w0])); p.set('to', isoDay(WEEKS[S.w1])); }
   if (S.sel !== null) p.set('entry', S.sel);
   const h = p.toString();
-  $('toLedger').href = 'atlas.html' + (h ? '#' + h : '');
+  const forLedger = new URLSearchParams(p); forLedger.delete('match');
+  $('toLedger').href = 'atlas.html' + (forLedger.toString() ? '#' + forLedger.toString() : '');
   if (PRESENT) p.set('deck', '1');
   const h2 = p.toString();
   history.replaceState(null, '', h2 ? '#' + h2 : location.pathname + location.search);
@@ -1820,7 +1709,8 @@ function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   S.q = p.get('q') || ''; $('q').value = S.q; ftIds = null; S.place = null;
   S.fam = FAMILIES.some(f => f.key === p.get('family')) ? p.get('family') : '';
-  S.tags = new Set((p.get('tags') || '').split(',').filter(t => TAGN.has(t)));
+  S.tags = (p.get('tags') || '').split(',').filter((t, k, a) => TAGN.has(t) && a.indexOf(t) === k);
+  S.tagAll = S.tags.length > 1 && p.get('match') === 'all';
   wantDeck = p.get('deck') === '1';
   S.w0 = S.w1 = null;
   const f = p.get('from'), t = p.get('to');
@@ -1832,7 +1722,7 @@ function applyHash() {
   applyFilters();
   if (S.q.length >= 3) setQuery(S.q);
   if (entry !== null) openEntry(entry, true);
-  present(wantDeck, wantDeck);
+  present(wantDeck);
 }
 addEventListener('hashchange', () => { if (N) applyHash(); });
 new ResizeObserver(() => { resize(); if (WEEKS.length) renderTime(); }).observe($('mapwrap'));
